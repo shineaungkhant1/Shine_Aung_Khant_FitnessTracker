@@ -76,7 +76,7 @@ public sealed class MainShellForm : BaseForm
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Bold),
             AutoSize = true,
-            Location = new Point(56, 20)
+            Location = new Point(10, 24)
         });
         profile.Controls.Add(new Label
         {
@@ -84,13 +84,7 @@ public sealed class MainShellForm : BaseForm
             ForeColor = AppTheme.MutedText,
             Font = new Font(AppTheme.FontFamily, 8.5F),
             AutoSize = true,
-            Location = new Point(56, 44)
-        });
-        profile.Controls.Add(new Panel
-        {
-            BackColor = AppTheme.SurfaceSoft,
-            Size = new Size(36, 36),
-            Location = new Point(10, 14)
+            Location = new Point(10, 48)
         });
 
         var menu = new FlowLayoutPanel
