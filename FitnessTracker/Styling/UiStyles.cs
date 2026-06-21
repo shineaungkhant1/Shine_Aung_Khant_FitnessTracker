@@ -84,7 +84,7 @@ public static class UiStyles
         {
             BackColor = AppTheme.Surface,
             BorderStyle = BorderStyle.FixedSingle,
-            Padding = new Padding(14),
+            Padding = new Padding(10),
             Margin = new Padding(0, 0, 0, 12)
         };
 
@@ -92,12 +92,11 @@ public static class UiStyles
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 4
+            RowCount = 3
         };
-        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
-        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-        content.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
 
         content.Controls.Add(new Label
         {
@@ -106,7 +105,7 @@ public static class UiStyles
             AutoSize = false,
             Dock = DockStyle.Fill,
             TextAlign = ContentAlignment.BottomLeft,
-            Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Bold)
+            Font = new Font(AppTheme.FontFamily, 8.8F, FontStyle.Bold)
         }, 0, 0);
         content.Controls.Add(new Label
         {
@@ -115,7 +114,7 @@ public static class UiStyles
             AutoSize = false,
             Dock = DockStyle.Fill,
             TextAlign = ContentAlignment.MiddleLeft,
-            Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
+            Font = new Font(AppTheme.FontFamily, 13.5F, FontStyle.Bold),
             Margin = new Padding(0)
         }, 0, 1);
         content.Controls.Add(new Label
@@ -124,8 +123,8 @@ public static class UiStyles
             ForeColor = AppTheme.MutedText,
             AutoSize = false,
             Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.TopLeft,
-            Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Regular)
+            TextAlign = ContentAlignment.MiddleLeft,
+            Font = new Font(AppTheme.FontFamily, 8.8F, FontStyle.Regular)
         }, 0, 2);
 
         panel.Controls.Add(content);
