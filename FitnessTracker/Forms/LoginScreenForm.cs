@@ -30,7 +30,7 @@ public sealed class LoginScreenForm : BaseForm
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
 
         var header = new TableLayoutPanel
         {
@@ -80,9 +80,9 @@ public sealed class LoginScreenForm : BaseForm
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
-        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
-        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
         form.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 6F));
 
@@ -149,7 +149,7 @@ public sealed class LoginScreenForm : BaseForm
             Text = "Account locks after 3 failed attempts.",
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
-            Margin = new Padding(0, 8, 0, 12)
+            Margin = new Padding(0, 8, 0, 8)
         });
         form.Controls.Add(loginButton);
         form.Controls.Add(registerButton);

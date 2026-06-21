@@ -8,6 +8,8 @@ public static class UiStyles
         button.ForeColor = AppTheme.Tertiary;
         button.FlatStyle = FlatStyle.Flat;
         button.FlatAppearance.BorderSize = 0;
+        button.FlatAppearance.MouseDownBackColor = ColorTranslator.FromHtml("#7EA8F0");
+        button.FlatAppearance.MouseOverBackColor = ColorTranslator.FromHtml("#B3D0FF");
         button.Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Bold);
         button.Height = 44;
         button.Cursor = Cursors.Hand;
@@ -21,6 +23,8 @@ public static class UiStyles
         button.FlatStyle = FlatStyle.Flat;
         button.FlatAppearance.BorderSize = 1;
         button.FlatAppearance.BorderColor = AppTheme.Border;
+        button.FlatAppearance.MouseDownBackColor = ColorTranslator.FromHtml("#2A3442");
+        button.FlatAppearance.MouseOverBackColor = ColorTranslator.FromHtml("#2A3442");
         button.Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular);
         button.Height = 40;
         button.Cursor = Cursors.Hand;

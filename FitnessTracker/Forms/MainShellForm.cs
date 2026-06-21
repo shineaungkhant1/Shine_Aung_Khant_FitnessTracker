@@ -1,6 +1,7 @@
 using FitnessTracker.Models;
 using FitnessTracker.Services;
 using FitnessTracker.Styling;
+using FitnessTracker.Controls;
 
 namespace FitnessTracker.Forms;
 
@@ -15,6 +16,8 @@ public sealed class MainShellForm : BaseForm
     private Button? _goalsNav;
     private Button? _activityNav;
     private Button? _helpNav;
+    private Button? _quickLogButton;
+    private bool _isLoggingOut;
 
     public MainShellForm(IAppService appService, IActivityDefinitionFactory activityDefinitionFactory)
     {
@@ -61,11 +64,19 @@ public sealed class MainShellForm : BaseForm
         var profile = new Panel { Dock = DockStyle.Fill, BackColor = AppTheme.Sidebar };
         profile.Controls.Add(new Label
         {
+            Text = "KINETIC",
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(10, 2)
+        });
+        profile.Controls.Add(new Label
+        {
             Text = _appService.CurrentUsername ?? "Guest",
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Bold),
             AutoSize = true,
-            Location = new Point(56, 16)
+            Location = new Point(56, 20)
         });
         profile.Controls.Add(new Label
         {
@@ -73,7 +84,7 @@ public sealed class MainShellForm : BaseForm
             ForeColor = AppTheme.MutedText,
             Font = new Font(AppTheme.FontFamily, 8.5F),
             AutoSize = true,
-            Location = new Point(56, 40)
+            Location = new Point(56, 44)
         });
         profile.Controls.Add(new Panel
         {
@@ -89,7 +100,7 @@ public sealed class MainShellForm : BaseForm
             WrapContents = false
         };
 
-        _dashboardNav = new Button { Text = "Dashboard", Width = 200 };
+        _dashboardNav = new Button { Text = "◻ Dashboard", Width = 200 };
         UiStyles.StyleSidebarButton(_dashboardNav, true);
         _dashboardNav.Click += (_, _) =>
         {
@@ -97,7 +108,7 @@ public sealed class MainShellForm : BaseForm
             ShowDashboard();
         };
 
-        _goalsNav = new Button { Text = "Goals", Width = 200 };
+        _goalsNav = new Button { Text = "◎ Goals", Width = 200 };
         UiStyles.StyleSidebarButton(_goalsNav);
         _goalsNav.Click += (_, _) =>
         {
@@ -105,7 +116,7 @@ public sealed class MainShellForm : BaseForm
             ShowGoals();
         };
 
-        _activityNav = new Button { Text = "Log Activity", Width = 200 };
+        _activityNav = new Button { Text = "⊕ Log Activity", Width = 200 };
         UiStyles.StyleSidebarButton(_activityNav);
         _activityNav.Click += (_, _) =>
         {
@@ -113,7 +124,7 @@ public sealed class MainShellForm : BaseForm
             ShowActivityLogger();
         };
 
-        _helpNav = new Button { Text = "Help", Width = 200 };
+        _helpNav = new Button { Text = "? Help", Width = 200 };
         UiStyles.StyleSidebarButton(_helpNav);
         _helpNav.Click += (_, _) =>
         {
@@ -126,10 +137,11 @@ public sealed class MainShellForm : BaseForm
         menu.Controls.Add(_activityNav);
         menu.Controls.Add(_helpNav);
 
-        var logoutButton = new Button { Text = "Logout", Dock = DockStyle.Fill };
+        var logoutButton = new Button { Text = "Settings / Logout", Dock = DockStyle.Fill };
         UiStyles.StyleSecondaryButton(logoutButton);
         logoutButton.Click += (_, _) =>
         {
+            _isLoggingOut = true;
             _appService.Logout();
             var login = new LoginScreenForm(_appService, new ActivityDefinitionFactory());
             login.Show();
@@ -159,6 +171,15 @@ public sealed class MainShellForm : BaseForm
         var header = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1
+        };
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170F));
+
+        var titleBlock = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 2
         };
@@ -169,8 +190,23 @@ public sealed class MainShellForm : BaseForm
         _headerSubtitle.ForeColor = AppTheme.MutedText;
         _headerSubtitle.Font = new Font(AppTheme.FontFamily, 11F);
         _headerSubtitle.AutoSize = true;
-        header.Controls.Add(_headerTitle, 0, 0);
-        header.Controls.Add(_headerSubtitle, 0, 1);
+        titleBlock.Controls.Add(_headerTitle, 0, 0);
+        titleBlock.Controls.Add(_headerSubtitle, 0, 1);
+        header.Controls.Add(titleBlock, 0, 0);
+
+        _quickLogButton = new Button
+        {
+            Text = "+  Log Workout",
+            Dock = DockStyle.Top,
+            Margin = new Padding(0, 14, 0, 0)
+        };
+        UiStyles.StylePrimaryButton(_quickLogButton);
+        _quickLogButton.Click += (_, _) =>
+        {
+            SetActiveNavigation(_activityNav);
+            ShowActivityLogger();
+        };
+        header.Controls.Add(_quickLogButton, 1, 0);
 
         var status = new TableLayoutPanel
         {
@@ -205,11 +241,12 @@ public sealed class MainShellForm : BaseForm
     {
         SetActiveNavigation(_dashboardNav);
         _headerTitle.Text = "Dashboard Overview";
-        _headerSubtitle.Text = "Track totals, progress, and latest activities.";
+        _headerSubtitle.Text = $"Ready to crush your goals today, {_appService.CurrentUsername}?";
 
         var totalCalories = _appService.GetTotalCalories();
         var goal = _appService.GetGoal();
         var goalStatus = _appService.IsGoalAchieved() ? "Achieved" : "In Progress";
+        var progressPercent = goal <= 0 ? 0 : Math.Min(100, (int)Math.Round((totalCalories / goal) * 100));
 
         var page = new TableLayoutPanel
         {
@@ -224,49 +261,144 @@ public sealed class MainShellForm : BaseForm
 
         var summaryCard = CreateCardPanel();
         summaryCard.Dock = DockStyle.Fill;
-        summaryCard.Controls.Add(new Label
+        var summaryLayout = new TableLayoutPanel
         {
-            Text = $"DAILY GOAL\n{totalCalories:F1} / {goal:F1} kcal\nStatus: {goalStatus}",
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1
+        };
+        summaryLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 68F));
+        summaryLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32F));
+
+        var leftBlock = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 7
+        };
+        leftBlock.Controls.Add(new Label
+        {
+            Text = "DAILY GOAL",
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Bold),
+            AutoSize = true
+        }, 0, 0);
+        leftBlock.Controls.Add(new Label
+        {
+            Text = $"{totalCalories:F1} / {goal:F1} kcal",
             ForeColor = AppTheme.Neutral,
-            Font = new Font(AppTheme.FontFamily, 18F, FontStyle.Bold),
+            Font = new Font(AppTheme.FontFamily, 32F, FontStyle.Bold),
+            AutoSize = true
+        }, 0, 1);
+        leftBlock.Controls.Add(new Label
+        {
+            Text = "Active Calories",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Regular),
+            AutoSize = true
+        }, 0, 2);
+        leftBlock.Controls.Add(new Label
+        {
+            Text = $"Goal Status: {goalStatus}",
+            ForeColor = _appService.IsGoalAchieved() ? AppTheme.Success : AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Bold),
             AutoSize = true,
-            Location = new Point(20, 24)
-        });
+            Margin = new Padding(0, 8, 0, 0)
+        }, 0, 3);
+
+        var progressTrack = new Panel
+        {
+            BackColor = AppTheme.Border,
+            Dock = DockStyle.Top,
+            Height = 10,
+            Margin = new Padding(0, 16, 0, 0)
+        };
+        var progressFill = new Panel
+        {
+            BackColor = AppTheme.Primary,
+            Height = 10,
+            Dock = DockStyle.Left
+        };
+        progressFill.Width = Math.Max(0, Math.Min(320, (int)(progressPercent * 3.2)));
+        progressTrack.Controls.Add(progressFill);
+        leftBlock.Controls.Add(progressTrack, 0, 4);
+        leftBlock.Controls.Add(new Label
+        {
+            Text = $"Progress: {progressPercent}%",
+            ForeColor = AppTheme.MutedText,
+            AutoSize = true,
+            Margin = new Padding(0, 8, 0, 0)
+        }, 0, 5);
+
+        var rightBlock = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 1
+        };
+        var ring = new CircularProgressControl
+        {
+            ProgressPercent = progressPercent,
+            Anchor = AnchorStyles.None
+        };
+        rightBlock.Controls.Add(ring, 0, 0);
+
+        summaryLayout.Controls.Add(leftBlock, 0, 0);
+        summaryLayout.Controls.Add(rightBlock, 1, 0);
+        summaryCard.Controls.Add(summaryLayout);
 
         var right = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        var totalCard = UiStyles.CreateMetricCard("TOTAL CALORIES", $"{totalCalories:F1}", "kcal");
-        totalCard.Dock = DockStyle.Fill;
-        var goalCard = UiStyles.CreateMetricCard("GOAL TARGET", $"{goal:F1}", "kcal");
-        goalCard.Dock = DockStyle.Fill;
-        right.Controls.Add(totalCard, 0, 0);
-        right.Controls.Add(goalCard, 0, 1);
+        var activeMinutes = UiStyles.CreateMetricCard("ACTIVE MINUTES", $"{Math.Max(1, (int)Math.Round(totalCalories / 2.5))}", "min");
+        activeMinutes.Dock = DockStyle.Fill;
+        var avgSleep = UiStyles.CreateMetricCard("AVG SLEEP", "7.2", "hours");
+        avgSleep.Dock = DockStyle.Fill;
+        right.Controls.Add(activeMinutes, 0, 0);
+        right.Controls.Add(avgSleep, 0, 1);
 
         var recentCard = CreateCardPanel();
         recentCard.Dock = DockStyle.Fill;
-        recentCard.Controls.Add(new Label
+        var recentLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 8
+        };
+        recentLayout.Controls.Add(new Label
         {
             Text = "Recent Activities",
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
-            AutoSize = true,
-            Location = new Point(20, 16)
+            AutoSize = true
         });
         var recent = _appService.GetRecentActivities(6);
-        var y = 52;
-        foreach (var record in recent)
+        if (recent.Count == 0)
         {
-            recentCard.Controls.Add(new Label
+            recentLayout.Controls.Add(new Label
             {
-                Text = $"{record.ActivityName} | {record.Calories:F1} kcal | {record.LoggedAt:g}",
+                Text = "No activities logged yet. Use Log Activity to begin.",
                 ForeColor = AppTheme.MutedText,
                 Font = new Font(AppTheme.FontFamily, 9.5F),
                 AutoSize = true,
-                Location = new Point(24, y)
+                Margin = new Padding(0, 8, 0, 0)
             });
-            y += 26;
         }
+        else
+        {
+            foreach (var record in recent)
+            {
+                recentLayout.Controls.Add(new Label
+                {
+                    Text = $"{record.ActivityName}   •   {record.Calories:F1} kcal   •   {record.LoggedAt:g}",
+                    ForeColor = AppTheme.MutedText,
+                    Font = new Font(AppTheme.FontFamily, 9.5F),
+                    AutoSize = true,
+                    Margin = new Padding(0, 8, 0, 0)
+                });
+            }
+        }
+        recentCard.Controls.Add(recentLayout);
 
         page.Controls.Add(summaryCard, 0, 0);
         page.Controls.Add(right, 1, 0);
@@ -499,6 +631,9 @@ public sealed class MainShellForm : BaseForm
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
         base.OnFormClosed(e);
-        Application.Exit();
+        if (!_isLoggingOut)
+        {
+            Application.Exit();
+        }
     }
 }
