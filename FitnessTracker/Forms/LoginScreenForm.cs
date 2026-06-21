@@ -58,15 +58,17 @@ public sealed class LoginScreenForm : BaseForm
         var cardWrap = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 3,
+            ColumnCount = 4,
             RowCount = 1
         };
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
 
         var card = CreateCardPanel();
         card.Dock = DockStyle.Fill;
+        card.Padding = new Padding(22);
 
         var form = new TableLayoutPanel
         {
@@ -86,7 +88,7 @@ public sealed class LoginScreenForm : BaseForm
         };
         UiStyles.StyleTextBox(passwordBox);
 
-        var loginButton = new Button { Text = "Log In", Width = 170 };
+        var loginButton = new Button { Text = "Log In", Width = 190 };
         UiStyles.StylePrimaryButton(loginButton);
         loginButton.Click += (_, _) =>
         {
@@ -102,7 +104,7 @@ public sealed class LoginScreenForm : BaseForm
             MessageBox.Show(message, "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         };
 
-        var registerButton = new Button { Text = "Create New Account", Width = 200 };
+        var registerButton = new Button { Text = "Create New Account", Width = 220 };
         UiStyles.StyleSecondaryButton(registerButton);
         registerButton.Click += (_, _) =>
         {
@@ -128,6 +130,10 @@ public sealed class LoginScreenForm : BaseForm
 
         card.Controls.Add(form);
         cardWrap.Controls.Add(card, 1, 0);
+        cardWrap.Controls.Add(UiStyles.CreateInfoPanel(
+            "Why Kinetic?",
+            "Track calories, set goals, and monitor progress from one workspace.\n\nYour account auto-locks temporarily after repeated failed login attempts for safety."),
+            2, 0);
 
         var status = new TableLayoutPanel
         {

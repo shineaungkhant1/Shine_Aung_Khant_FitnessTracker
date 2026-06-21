@@ -8,9 +8,10 @@ public static class UiStyles
         button.ForeColor = AppTheme.Tertiary;
         button.FlatStyle = FlatStyle.Flat;
         button.FlatAppearance.BorderSize = 0;
-        button.Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Bold);
-        button.Height = 42;
+        button.Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Bold);
+        button.Height = 44;
         button.Cursor = Cursors.Hand;
+        button.Padding = new Padding(10, 0, 10, 0);
     }
 
     public static void StyleSecondaryButton(Button button)
@@ -21,8 +22,9 @@ public static class UiStyles
         button.FlatAppearance.BorderSize = 1;
         button.FlatAppearance.BorderColor = AppTheme.Border;
         button.Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular);
-        button.Height = 38;
+        button.Height = 40;
         button.Cursor = Cursors.Hand;
+        button.Padding = new Padding(10, 0, 10, 0);
     }
 
     public static void StyleSidebarButton(Button button, bool active = false)
@@ -44,8 +46,8 @@ public static class UiStyles
         textBox.BackColor = AppTheme.SurfaceSoft;
         textBox.ForeColor = AppTheme.Neutral;
         textBox.BorderStyle = BorderStyle.FixedSingle;
-        textBox.Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular);
-        textBox.Height = 34;
+        textBox.Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Regular);
+        textBox.Height = 36;
     }
 
     public static Label CreateSectionTitle(string text)
@@ -113,6 +115,35 @@ public static class UiStyles
         valueLabel.Location = new Point(14, 34);
         titleLabel.Location = new Point(14, 14);
         panel.Height = 106;
+        return panel;
+    }
+
+    public static Panel CreateInfoPanel(string title, string body)
+    {
+        var panel = new Panel
+        {
+            BackColor = AppTheme.SurfaceSoft,
+            BorderStyle = BorderStyle.FixedSingle,
+            Padding = new Padding(18)
+        };
+
+        panel.Controls.Add(new Label
+        {
+            Text = title,
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 12F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(16, 16)
+        });
+        panel.Controls.Add(new Label
+        {
+            Text = body,
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular),
+            AutoSize = true,
+            MaximumSize = new Size(260, 0),
+            Location = new Point(16, 48)
+        });
         return panel;
     }
 }

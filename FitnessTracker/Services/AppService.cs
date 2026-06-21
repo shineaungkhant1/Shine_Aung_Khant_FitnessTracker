@@ -9,6 +9,7 @@ public sealed class AppService : IAppService
 {
     private readonly string _connectionString;
     private const int MaxFailedAttempts = 3;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(5);
 
     public AppService()
     {
@@ -65,7 +66,7 @@ public sealed class AppService : IAppService
         using var connection = OpenConnection();
         using var selectCommand = connection.CreateCommand();
         selectCommand.CommandText = """
-            SELECT Password, FailedLoginAttempts, IsLocked
+            SELECT Password, FailedLoginAttempts, IsLocked, LockedUntilUtc
             FROM Users
             WHERE Username = $username;
             """;
@@ -81,11 +82,32 @@ public sealed class AppService : IAppService
         var storedPassword = reader.GetString(0);
         var failedAttempts = reader.GetInt32(1);
         var isLocked = reader.GetInt32(2) == 1;
+        var lockedUntilRaw = reader.IsDBNull(3) ? null : reader.GetString(3);
 
         if (isLocked)
         {
-            message = "Account is locked due to multiple failed attempts.";
-            return false;
+            if (TryParseUtc(lockedUntilRaw, out var lockedUntilUtc) && DateTime.UtcNow < lockedUntilUtc)
+            {
+                var remaining = lockedUntilUtc - DateTime.UtcNow;
+                var remainingMinutes = Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes));
+                message = $"Account is locked. Try again in about {remainingMinutes} minute(s).";
+                return false;
+            }
+
+            // Lock duration expired, unlock automatically.
+            using var unlockCommand = connection.CreateCommand();
+            unlockCommand.CommandText = """
+                UPDATE Users
+                SET FailedLoginAttempts = 0,
+                    IsLocked = 0,
+                    LockedUntilUtc = NULL
+                WHERE Username = $username;
+                """;
+            unlockCommand.Parameters.AddWithValue("$username", username);
+            unlockCommand.ExecuteNonQuery();
+
+            failedAttempts = 0;
+            isLocked = false;
         }
 
         if (!string.Equals(storedPassword, password, StringComparison.Ordinal))
@@ -97,17 +119,20 @@ public sealed class AppService : IAppService
             updateCommand.CommandText = """
                 UPDATE Users
                 SET FailedLoginAttempts = $failedAttempts,
-                    IsLocked = $isLocked
+                    IsLocked = $isLocked,
+                    LockedUntilUtc = $lockedUntil
                 WHERE Username = $username;
                 """;
             updateCommand.Parameters.AddWithValue("$failedAttempts", failedAttempts);
             updateCommand.Parameters.AddWithValue("$isLocked", lockAccount ? 1 : 0);
+            updateCommand.Parameters.AddWithValue("$lockedUntil",
+                lockAccount ? DateTime.UtcNow.Add(LockoutDuration).ToString("O", CultureInfo.InvariantCulture) : DBNull.Value);
             updateCommand.Parameters.AddWithValue("$username", username);
             updateCommand.ExecuteNonQuery();
 
             if (lockAccount)
             {
-                message = "Account locked after multiple failed attempts.";
+                message = $"Account locked after {MaxFailedAttempts} failed attempts. Try again in about {(int)LockoutDuration.TotalMinutes} minute(s).";
                 return false;
             }
 
@@ -118,7 +143,9 @@ public sealed class AppService : IAppService
         using var resetCommand = connection.CreateCommand();
         resetCommand.CommandText = """
             UPDATE Users
-            SET FailedLoginAttempts = 0, IsLocked = 0
+            SET FailedLoginAttempts = 0,
+                IsLocked = 0,
+                LockedUntilUtc = NULL
             WHERE Username = $username;
             """;
         resetCommand.Parameters.AddWithValue("$username", username);
@@ -330,6 +357,7 @@ public sealed class AppService : IAppService
                 Password TEXT NOT NULL,
                 FailedLoginAttempts INTEGER NOT NULL DEFAULT 0,
                 IsLocked INTEGER NOT NULL DEFAULT 0,
+                LockedUntilUtc TEXT NULL,
                 GoalCalories REAL NOT NULL DEFAULT 300
             );
 
@@ -345,5 +373,52 @@ public sealed class AppService : IAppService
             );
             """;
         command.ExecuteNonQuery();
+
+        EnsureLockedUntilColumnExists(connection);
+    }
+
+    private static bool TryParseUtc(string? value, out DateTime utcValue)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            utcValue = default;
+            return false;
+        }
+
+        if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed))
+        {
+            utcValue = default;
+            return false;
+        }
+
+        utcValue = parsed.Kind == DateTimeKind.Utc ? parsed : parsed.ToUniversalTime();
+        return true;
+    }
+
+    private static void EnsureLockedUntilColumnExists(SqliteConnection connection)
+    {
+        using var pragmaCommand = connection.CreateCommand();
+        pragmaCommand.CommandText = "PRAGMA table_info(Users);";
+
+        using var reader = pragmaCommand.ExecuteReader();
+        var hasColumn = false;
+        while (reader.Read())
+        {
+            var columnName = reader.GetString(1);
+            if (string.Equals(columnName, "LockedUntilUtc", StringComparison.OrdinalIgnoreCase))
+            {
+                hasColumn = true;
+                break;
+            }
+        }
+
+        if (hasColumn)
+        {
+            return;
+        }
+
+        using var alterCommand = connection.CreateCommand();
+        alterCommand.CommandText = "ALTER TABLE Users ADD COLUMN LockedUntilUtc TEXT NULL;";
+        alterCommand.ExecuteNonQuery();
     }
 }

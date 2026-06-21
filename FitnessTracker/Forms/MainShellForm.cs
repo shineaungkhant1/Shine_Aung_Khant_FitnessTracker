@@ -11,6 +11,10 @@ public sealed class MainShellForm : BaseForm
     private readonly Panel _contentHost = new() { Dock = DockStyle.Fill };
     private readonly Label _headerTitle = new();
     private readonly Label _headerSubtitle = new();
+    private Button? _dashboardNav;
+    private Button? _goalsNav;
+    private Button? _activityNav;
+    private Button? _helpNav;
 
     public MainShellForm(IAppService appService, IActivityDefinitionFactory activityDefinitionFactory)
     {
@@ -85,26 +89,42 @@ public sealed class MainShellForm : BaseForm
             WrapContents = false
         };
 
-        var dashboardButton = new Button { Text = "Dashboard", Width = 200 };
-        UiStyles.StyleSidebarButton(dashboardButton, true);
-        dashboardButton.Click += (_, _) => ShowDashboard();
+        _dashboardNav = new Button { Text = "Dashboard", Width = 200 };
+        UiStyles.StyleSidebarButton(_dashboardNav, true);
+        _dashboardNav.Click += (_, _) =>
+        {
+            SetActiveNavigation(_dashboardNav);
+            ShowDashboard();
+        };
 
-        var goalsButton = new Button { Text = "Goals", Width = 200 };
-        UiStyles.StyleSidebarButton(goalsButton);
-        goalsButton.Click += (_, _) => ShowGoals();
+        _goalsNav = new Button { Text = "Goals", Width = 200 };
+        UiStyles.StyleSidebarButton(_goalsNav);
+        _goalsNav.Click += (_, _) =>
+        {
+            SetActiveNavigation(_goalsNav);
+            ShowGoals();
+        };
 
-        var logActivityButton = new Button { Text = "Log Activity", Width = 200 };
-        UiStyles.StyleSidebarButton(logActivityButton);
-        logActivityButton.Click += (_, _) => ShowActivityLogger();
+        _activityNav = new Button { Text = "Log Activity", Width = 200 };
+        UiStyles.StyleSidebarButton(_activityNav);
+        _activityNav.Click += (_, _) =>
+        {
+            SetActiveNavigation(_activityNav);
+            ShowActivityLogger();
+        };
 
-        var helpButton = new Button { Text = "Help", Width = 200 };
-        UiStyles.StyleSidebarButton(helpButton);
-        helpButton.Click += (_, _) => ShowHelp();
+        _helpNav = new Button { Text = "Help", Width = 200 };
+        UiStyles.StyleSidebarButton(_helpNav);
+        _helpNav.Click += (_, _) =>
+        {
+            SetActiveNavigation(_helpNav);
+            ShowHelp();
+        };
 
-        menu.Controls.Add(dashboardButton);
-        menu.Controls.Add(goalsButton);
-        menu.Controls.Add(logActivityButton);
-        menu.Controls.Add(helpButton);
+        menu.Controls.Add(_dashboardNav);
+        menu.Controls.Add(_goalsNav);
+        menu.Controls.Add(_activityNav);
+        menu.Controls.Add(_helpNav);
 
         var logoutButton = new Button { Text = "Logout", Dock = DockStyle.Fill };
         UiStyles.StyleSecondaryButton(logoutButton);
@@ -183,6 +203,7 @@ public sealed class MainShellForm : BaseForm
 
     private void ShowDashboard()
     {
+        SetActiveNavigation(_dashboardNav);
         _headerTitle.Text = "Dashboard Overview";
         _headerSubtitle.Text = "Track totals, progress, and latest activities.";
 
@@ -257,6 +278,7 @@ public sealed class MainShellForm : BaseForm
 
     private void ShowGoals()
     {
+        SetActiveNavigation(_goalsNav);
         _headerTitle.Text = "Goal Management";
         _headerSubtitle.Text = "Set and save your personalized calorie target.";
 
@@ -317,6 +339,7 @@ public sealed class MainShellForm : BaseForm
 
     private void ShowActivityLogger()
     {
+        SetActiveNavigation(_activityNav);
         _headerTitle.Text = "Log Activity";
         _headerSubtitle.Text = "Record metrics for one activity and save calories.";
 
@@ -431,6 +454,7 @@ public sealed class MainShellForm : BaseForm
 
     private void ShowHelp()
     {
+        SetActiveNavigation(_helpNav);
         _headerTitle.Text = "Help & Guidance";
         _headerSubtitle.Text = "Quick guidance for using each feature.";
 
@@ -438,8 +462,8 @@ public sealed class MainShellForm : BaseForm
         page.Dock = DockStyle.Fill;
         page.Controls.Add(new Label
         {
-            Text = "1) Register with letters/numbers username and 12-char password.\n" +
-                   "2) Login. After 3 wrong attempts account is locked.\n" +
+            Text = "1) Register with letters/numbers username and a password with upper/lower case letters.\n" +
+                   "2) Login. After 3 wrong attempts account is temporarily locked.\n" +
                    "3) Set your goal in Goals.\n" +
                    "4) Log activities with all 3 metrics.\n" +
                    "5) Check dashboard for total calories and goal achievement.",
@@ -457,6 +481,19 @@ public sealed class MainShellForm : BaseForm
         _contentHost.Controls.Clear();
         page.Dock = DockStyle.Fill;
         _contentHost.Controls.Add(page);
+    }
+
+    private void SetActiveNavigation(Button? activeButton)
+    {
+        if (_dashboardNav is null || _goalsNav is null || _activityNav is null || _helpNav is null)
+        {
+            return;
+        }
+
+        UiStyles.StyleSidebarButton(_dashboardNav, activeButton == _dashboardNav);
+        UiStyles.StyleSidebarButton(_goalsNav, activeButton == _goalsNav);
+        UiStyles.StyleSidebarButton(_activityNav, activeButton == _activityNav);
+        UiStyles.StyleSidebarButton(_helpNav, activeButton == _helpNav);
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
