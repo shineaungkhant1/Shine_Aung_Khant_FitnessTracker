@@ -29,9 +29,9 @@ public sealed class AppService : IAppService
             return false;
         }
 
-        if (!IsValidPassword(password))
+        if (!TryValidatePassword(password, out var passwordMessage))
         {
-            message = "Password must be exactly 12 characters with upper and lower case letters.";
+            message = passwordMessage;
             return false;
         }
 
@@ -281,11 +281,28 @@ public sealed class AppService : IAppService
         return records;
     }
 
-    private static bool IsValidPassword(string password)
+    private static bool TryValidatePassword(string password, out string message)
     {
-        return password.Length == 12
-               && password.Any(char.IsLower)
-               && password.Any(char.IsUpper);
+        if (password.Length != 12)
+        {
+            message = $"Password must be exactly 12 characters. Current length: {password.Length}.";
+            return false;
+        }
+
+        if (!password.Any(char.IsUpper))
+        {
+            message = "Password must contain at least one uppercase letter.";
+            return false;
+        }
+
+        if (!password.Any(char.IsLower))
+        {
+            message = "Password must contain at least one lowercase letter.";
+            return false;
+        }
+
+        message = string.Empty;
+        return true;
     }
 
     private static double CalculateCalories(string activityName, double metric1, double metric2, double metric3)
