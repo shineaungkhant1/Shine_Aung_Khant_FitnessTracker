@@ -58,13 +58,12 @@ public sealed class LoginScreenForm : BaseForm
         var cardWrap = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 4,
+            ColumnCount = 3,
             RowCount = 1
         };
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
 
         var card = CreateCardPanel();
         card.Dock = DockStyle.Fill;
@@ -74,37 +73,64 @@ public sealed class LoginScreenForm : BaseForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 9
+            RowCount = 10
         };
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
+        form.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 6F));
 
-        var usernameBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Username" };
+        var usernameBox = new TextBox { Dock = DockStyle.Fill, PlaceholderText = "Username" };
         UiStyles.StyleTextBox(usernameBox);
         var passwordBox = new TextBox
         {
-            Dock = DockStyle.Top,
+            Dock = DockStyle.Fill,
             PlaceholderText = "Password",
             UseSystemPasswordChar = true,
             PasswordChar = '*'
         };
         UiStyles.StyleTextBox(passwordBox);
 
-        var loginButton = new Button { Text = "Log In", Width = 190 };
+        Button? registerButton = null;
+
+        var loginButton = new Button { Text = "Log In", Dock = DockStyle.Fill };
         UiStyles.StylePrimaryButton(loginButton);
-        loginButton.Click += (_, _) =>
+        loginButton.Click += async (_, _) =>
         {
             if (_appService.Login(usernameBox.Text, passwordBox.Text, out var message))
             {
-                MessageBox.Show(message, "Login", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var originalButtonText = loginButton.Text;
+                loginButton.Enabled = false;
+                if (registerButton is not null)
+                {
+                    registerButton.Enabled = false;
+                }
+                usernameBox.Enabled = false;
+                passwordBox.Enabled = false;
+                loginButton.Text = "Signing In...";
+                UseWaitCursor = true;
+
+                await Task.Delay(700);
+
                 var shell = new MainShellForm(_appService, _activityDefinitionFactory);
                 shell.Show();
                 Hide();
+
+                loginButton.Text = originalButtonText;
+                UseWaitCursor = false;
                 return;
             }
 
             MessageBox.Show(message, "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         };
 
-        var registerButton = new Button { Text = "Create New Account", Width = 220 };
+        registerButton = new Button { Text = "Create New Account", Dock = DockStyle.Fill };
         UiStyles.StyleSecondaryButton(registerButton);
         registerButton.Click += (_, _) =>
         {
@@ -130,10 +156,6 @@ public sealed class LoginScreenForm : BaseForm
 
         card.Controls.Add(form);
         cardWrap.Controls.Add(card, 1, 0);
-        cardWrap.Controls.Add(UiStyles.CreateInfoPanel(
-            "Why Kinetic?",
-            "Track calories, set goals, and monitor progress from one workspace.\n\nYour account auto-locks temporarily after repeated failed login attempts for safety."),
-            2, 0);
 
         var status = new TableLayoutPanel
         {

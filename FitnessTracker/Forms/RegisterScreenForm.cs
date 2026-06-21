@@ -58,13 +58,12 @@ public sealed class RegisterScreenForm : BaseForm
         var cardWrap = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 4,
+            ColumnCount = 3,
             RowCount = 1
         };
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28F));
-        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56F));
+        cardWrap.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
 
         var card = CreateCardPanel();
         card.Dock = DockStyle.Fill;
@@ -74,14 +73,26 @@ public sealed class RegisterScreenForm : BaseForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 11
+            RowCount = 12
         };
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
+        form.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 6F));
 
-        var usernameBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Username (letters and numbers only)" };
+        var usernameBox = new TextBox { Dock = DockStyle.Fill, PlaceholderText = "Username (letters and numbers only)" };
         UiStyles.StyleTextBox(usernameBox);
         var passwordBox = new TextBox
         {
-            Dock = DockStyle.Top,
+            Dock = DockStyle.Fill,
             PlaceholderText = "Password",
             UseSystemPasswordChar = true,
             PasswordChar = '*'
@@ -89,14 +100,14 @@ public sealed class RegisterScreenForm : BaseForm
         UiStyles.StyleTextBox(passwordBox);
         var confirmBox = new TextBox
         {
-            Dock = DockStyle.Top,
+            Dock = DockStyle.Fill,
             PlaceholderText = "Confirm password",
             UseSystemPasswordChar = true,
             PasswordChar = '*'
         };
         UiStyles.StyleTextBox(confirmBox);
 
-        var registerButton = new Button { Text = "Create Account", Width = 210 };
+        var registerButton = new Button { Text = "Create Account", Dock = DockStyle.Fill };
         UiStyles.StylePrimaryButton(registerButton);
         registerButton.Click += (_, _) =>
         {
@@ -118,7 +129,7 @@ public sealed class RegisterScreenForm : BaseForm
             MessageBox.Show(message, "Register Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         };
 
-        var backButton = new Button { Text = "Back to Login", Width = 190 };
+        var backButton = new Button { Text = "Back to Login", Dock = DockStyle.Fill };
         UiStyles.StyleSecondaryButton(backButton);
         backButton.Click += (_, _) =>
         {
@@ -146,10 +157,6 @@ public sealed class RegisterScreenForm : BaseForm
 
         card.Controls.Add(form);
         cardWrap.Controls.Add(card, 1, 0);
-        cardWrap.Controls.Add(UiStyles.CreateInfoPanel(
-            "Registration Rules",
-            "Username: letters and numbers only.\nPassword: must include at least one uppercase and one lowercase letter.\n\nAfter creating your account, sign in and start tracking activities."),
-            2, 0);
 
         var status = new TableLayoutPanel
         {
