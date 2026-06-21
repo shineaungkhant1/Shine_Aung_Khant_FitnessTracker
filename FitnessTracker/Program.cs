@@ -13,8 +13,9 @@ namespace FitnessTracker
         {
             ApplicationConfiguration.Initialize();
 
+            IAppService appService = new AppService();
             IActivityDefinitionFactory activityDefinitionFactory = new ActivityDefinitionFactory();
-            Application.Run(new LoginForm(activityDefinitionFactory));
+            Application.Run(new AuthForm(appService, activityDefinitionFactory));
         }
     }
 }
