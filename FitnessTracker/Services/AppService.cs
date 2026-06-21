@@ -283,12 +283,6 @@ public sealed class AppService : IAppService
 
     private static bool TryValidatePassword(string password, out string message)
     {
-        if (password.Length != 12)
-        {
-            message = $"Password must be exactly 12 characters. Current length: {password.Length}.";
-            return false;
-        }
-
         if (!password.Any(char.IsUpper))
         {
             message = "Password must contain at least one uppercase letter.";

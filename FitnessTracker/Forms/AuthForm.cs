@@ -120,9 +120,8 @@ public sealed class AuthForm : BaseForm
 
         var usernameBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Username" };
         UiStyles.StyleTextBox(usernameBox);
-        var passwordBox = new TextBox { Dock = DockStyle.Fill, PlaceholderText = "Password", UseSystemPasswordChar = true };
+        var passwordBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Password", UseSystemPasswordChar = true };
         UiStyles.StyleTextBox(passwordBox);
-        var passwordRow = CreatePasswordInputRow(passwordBox);
 
         _loginMessage.ForeColor = AppTheme.MutedText;
         _loginMessage.AutoSize = true;
@@ -148,7 +147,7 @@ public sealed class AuthForm : BaseForm
         layout.Controls.Add(UiStyles.CreateCaption("Username"));
         layout.Controls.Add(usernameBox);
         layout.Controls.Add(UiStyles.CreateCaption("Password"));
-        layout.Controls.Add(passwordRow);
+        layout.Controls.Add(passwordBox);
         layout.Controls.Add(_loginMessage);
         layout.Controls.Add(loginButton);
         page.Controls.Add(layout);
@@ -173,12 +172,10 @@ public sealed class AuthForm : BaseForm
 
         var usernameBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Username (letters and numbers)" };
         UiStyles.StyleTextBox(usernameBox);
-        var passwordBox = new TextBox { Dock = DockStyle.Fill, PlaceholderText = "Password (exactly 12 chars)", UseSystemPasswordChar = true };
+        var passwordBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Password", UseSystemPasswordChar = true };
         UiStyles.StyleTextBox(passwordBox);
-        var confirmBox = new TextBox { Dock = DockStyle.Fill, PlaceholderText = "Confirm password", UseSystemPasswordChar = true };
+        var confirmBox = new TextBox { Dock = DockStyle.Top, PlaceholderText = "Confirm password", UseSystemPasswordChar = true };
         UiStyles.StyleTextBox(confirmBox);
-        var passwordRow = CreatePasswordInputRow(passwordBox);
-        var confirmRow = CreatePasswordInputRow(confirmBox);
 
         _registerMessage.ForeColor = AppTheme.MutedText;
         _registerMessage.AutoSize = true;
@@ -209,44 +206,13 @@ public sealed class AuthForm : BaseForm
         layout.Controls.Add(UiStyles.CreateCaption("Username"));
         layout.Controls.Add(usernameBox);
         layout.Controls.Add(UiStyles.CreateCaption("Password"));
-        layout.Controls.Add(passwordRow);
+        layout.Controls.Add(passwordBox);
         layout.Controls.Add(UiStyles.CreateCaption("Confirm Password"));
-        layout.Controls.Add(confirmRow);
+        layout.Controls.Add(confirmBox);
         layout.Controls.Add(_registerMessage);
         layout.Controls.Add(registerButton);
         page.Controls.Add(layout);
         return page;
-    }
-
-    private static Control CreatePasswordInputRow(TextBox passwordTextBox)
-    {
-        var row = new TableLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            ColumnCount = 2,
-            RowCount = 1,
-            Height = 36,
-            Margin = new Padding(0, 0, 0, 0)
-        };
-        row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        row.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70F));
-
-        var toggleButton = new Button
-        {
-            Text = "Show",
-            Dock = DockStyle.Fill
-        };
-        UiStyles.StyleSecondaryButton(toggleButton);
-        toggleButton.Height = 32;
-        toggleButton.Click += (_, _) =>
-        {
-            passwordTextBox.UseSystemPasswordChar = !passwordTextBox.UseSystemPasswordChar;
-            toggleButton.Text = passwordTextBox.UseSystemPasswordChar ? "Show" : "Hide";
-        };
-
-        row.Controls.Add(passwordTextBox, 0, 0);
-        row.Controls.Add(toggleButton, 1, 0);
-        return row;
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
