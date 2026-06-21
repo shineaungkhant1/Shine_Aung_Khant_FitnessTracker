@@ -19,22 +19,46 @@ public sealed class RegisterForm : BaseForm
 
     private void BuildLayout()
     {
-        var root = new Panel
+        var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             Padding = new Padding(24),
-            BackColor = AppTheme.Tertiary
+            BackColor = AppTheme.Tertiary,
+            ColumnCount = 3,
+            RowCount = 3
         };
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64F));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+
+        var titlePanel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 1
+        };
+        titlePanel.Controls.Add(new Label
+        {
+            Text = "KINETIC",
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 20F, FontStyle.Bold),
+            AutoSize = true,
+            Anchor = AnchorStyles.None
+        }, 0, 0);
 
         var card = CreateCardPanel();
-        card.Size = new Size(620, 520);
-        card.Location = new Point(170, 72);
+        card.Dock = DockStyle.Fill;
+        card.Margin = new Padding(0, 0, 0, 0);
 
         var content = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 12
+            RowCount = 12,
+            AutoScroll = true
         };
 
         content.Controls.Add(UiStyles.CreateSectionTitle("Create your Kinetic account"));
@@ -46,7 +70,7 @@ public sealed class RegisterForm : BaseForm
             Margin = new Padding(0, 0, 0, 14)
         });
         content.Controls.Add(UiStyles.CreateCaption("Username"));
-        var usernameTextBox = new TextBox { PlaceholderText = "Letters and numbers only", Width = 440 };
+        var usernameTextBox = new TextBox { PlaceholderText = "Letters and numbers only", Dock = DockStyle.Top };
         UiStyles.StyleTextBox(usernameTextBox);
         content.Controls.Add(usernameTextBox);
 
@@ -54,7 +78,7 @@ public sealed class RegisterForm : BaseForm
         var passwordTextBox = new TextBox
         {
             PlaceholderText = "Exactly 12 characters with uppercase and lowercase",
-            Width = 440,
+            Dock = DockStyle.Top,
             PasswordChar = '*'
         };
         UiStyles.StyleTextBox(passwordTextBox);
@@ -64,7 +88,7 @@ public sealed class RegisterForm : BaseForm
         var confirmPasswordTextBox = new TextBox
         {
             PlaceholderText = "Re-enter password",
-            Width = 440,
+            Dock = DockStyle.Top,
             PasswordChar = '*'
         };
         UiStyles.StyleTextBox(confirmPasswordTextBox);
@@ -86,7 +110,7 @@ public sealed class RegisterForm : BaseForm
             FlowDirection = FlowDirection.LeftToRight
         };
 
-        var createButton = new Button { Text = "Create Account", Width = 210 };
+        var createButton = new Button { Text = "Create Account", Width = 200 };
         UiStyles.StylePrimaryButton(createButton);
         createButton.Click += (_, _) =>
         {
@@ -97,7 +121,7 @@ public sealed class RegisterForm : BaseForm
                 MessageBoxIcon.Information);
         };
 
-        var backButton = new Button { Text = "Back to Login", Width = 210 };
+        var backButton = new Button { Text = "Back to Login", Width = 200 };
         UiStyles.StyleSecondaryButton(backButton);
         backButton.Click += (_, _) =>
         {
@@ -111,15 +135,8 @@ public sealed class RegisterForm : BaseForm
         content.Controls.Add(actionPanel);
 
         card.Controls.Add(content);
-        root.Controls.Add(card);
-        root.Controls.Add(new Label
-        {
-            Text = "KINETIC",
-            ForeColor = AppTheme.Neutral,
-            Font = new Font(AppTheme.FontFamily, 20F, FontStyle.Bold),
-            AutoSize = true,
-            Location = new Point(430, 20)
-        });
+        root.Controls.Add(titlePanel, 1, 0);
+        root.Controls.Add(card, 1, 1);
         Controls.Add(root);
     }
 }

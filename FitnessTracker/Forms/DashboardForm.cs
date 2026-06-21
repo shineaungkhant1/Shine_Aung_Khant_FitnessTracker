@@ -41,17 +41,21 @@ public sealed class DashboardForm : BaseForm
 
     private Panel BuildSidebar()
     {
-        var sidebar = new Panel
+        var sidebar = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             BackColor = AppTheme.Sidebar,
-            Padding = new Padding(12)
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 3
         };
+        sidebar.RowStyles.Add(new RowStyle(SizeType.Absolute, 94F));
+        sidebar.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        sidebar.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
 
         var profile = new Panel
         {
-            Dock = DockStyle.Top,
-            Height = 86,
+            Dock = DockStyle.Fill,
             BackColor = AppTheme.Sidebar
         };
         profile.Controls.Add(new Label
@@ -81,10 +85,11 @@ public sealed class DashboardForm : BaseForm
 
         var menu = new FlowLayoutPanel
         {
-            Dock = DockStyle.Top,
+            Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
-            Height = 280
+            AutoScroll = true,
+            Padding = new Padding(0, 6, 0, 6)
         };
 
         var dashboardButton = new Button { Text = "Dashboard", Width = 190 };
@@ -92,6 +97,12 @@ public sealed class DashboardForm : BaseForm
 
         var goalsButton = new Button { Text = "Goals", Width = 190 };
         UiStyles.StyleSidebarButton(goalsButton);
+        goalsButton.Click += (_, _) =>
+        {
+            var goals = new GoalsForm(_activityDefinitionFactory, _displayName);
+            goals.Show();
+            Hide();
+        };
 
         var logActivityButton = new Button { Text = "Log Activity", Width = 190 };
         UiStyles.StyleSidebarButton(logActivityButton);
@@ -104,15 +115,20 @@ public sealed class DashboardForm : BaseForm
 
         var helpButton = new Button { Text = "Help", Width = 190 };
         UiStyles.StyleSidebarButton(helpButton);
+        helpButton.Click += (_, _) =>
+        {
+            var help = new HelpForm(_activityDefinitionFactory, _displayName);
+            help.Show();
+            Hide();
+        };
 
         menu.Controls.Add(dashboardButton);
         menu.Controls.Add(goalsButton);
         menu.Controls.Add(logActivityButton);
         menu.Controls.Add(helpButton);
 
-        var logoutButton = new Button { Text = "Settings / Logout", Width = 190 };
+        var logoutButton = new Button { Text = "Settings / Logout", Dock = DockStyle.Fill };
         UiStyles.StyleSecondaryButton(logoutButton);
-        logoutButton.Location = new Point(12, 565);
         logoutButton.Click += (_, _) =>
         {
             var loginForm = new LoginForm(_activityDefinitionFactory);
@@ -120,44 +136,57 @@ public sealed class DashboardForm : BaseForm
             Hide();
         };
 
-        sidebar.Controls.Add(logoutButton);
-        sidebar.Controls.Add(menu);
-        sidebar.Controls.Add(profile);
-        return sidebar;
+        sidebar.Controls.Add(profile, 0, 0);
+        sidebar.Controls.Add(menu, 0, 1);
+        sidebar.Controls.Add(logoutButton, 0, 2);
+        return (Panel)sidebar;
     }
 
     private Panel BuildContentArea()
     {
-        var content = new Panel
+        var content = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             BackColor = AppTheme.Tertiary,
-            Padding = new Padding(24)
+            Padding = new Padding(24),
+            ColumnCount = 1,
+            RowCount = 3
         };
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 92F));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
 
-        var header = new Panel
+        var header = new TableLayoutPanel
         {
             Dock = DockStyle.Top,
-            Height = 82
+            ColumnCount = 2,
+            RowCount = 1
         };
-        header.Controls.Add(new Label
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170F));
+
+        var headerTextPanel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2
+        };
+        headerTextPanel.Controls.Add(new Label
         {
             Text = "Dashboard Overview",
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 26F, FontStyle.Bold),
-            AutoSize = true,
-            Location = new Point(0, 0)
-        });
-        header.Controls.Add(new Label
+            AutoSize = true
+        }, 0, 0);
+        headerTextPanel.Controls.Add(new Label
         {
             Text = $"Ready to crush your goals today, {_displayName}?",
             ForeColor = AppTheme.MutedText,
             Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Regular),
-            AutoSize = true,
-            Location = new Point(2, 46)
-        });
+            AutoSize = true
+        }, 0, 1);
 
-        var logButton = new Button { Text = "+  Log Workout", Width = 140, Location = new Point(690, 18) };
+        var logButton = new Button { Text = "+  Log Workout", Dock = DockStyle.Top, Margin = new Padding(0, 16, 0, 0) };
         UiStyles.StylePrimaryButton(logButton);
         logButton.Click += (_, _) =>
         {
@@ -165,7 +194,8 @@ public sealed class DashboardForm : BaseForm
             activityForm.Show();
             Hide();
         };
-        header.Controls.Add(logButton);
+        header.Controls.Add(headerTextPanel, 0, 0);
+        header.Controls.Add(logButton, 1, 0);
 
         var mainGrid = new TableLayoutPanel
         {
@@ -214,13 +244,20 @@ public sealed class DashboardForm : BaseForm
             Location = new Point(24, 156)
         });
 
-        var rightStats = new Panel { Dock = DockStyle.Fill };
+        var rightStats = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2
+        };
+        rightStats.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+        rightStats.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
         var activeMinutesCard = UiStyles.CreateMetricCard("ACTIVE MINUTES", "345", "minutes");
-        activeMinutesCard.Dock = DockStyle.Top;
+        activeMinutesCard.Dock = DockStyle.Fill;
         var sleepCard = UiStyles.CreateMetricCard("AVG SLEEP", "7.2", "hours");
-        sleepCard.Dock = DockStyle.Top;
-        rightStats.Controls.Add(sleepCard);
-        rightStats.Controls.Add(activeMinutesCard);
+        sleepCard.Dock = DockStyle.Fill;
+        rightStats.Controls.Add(activeMinutesCard, 0, 0);
+        rightStats.Controls.Add(sleepCard, 0, 1);
 
         var activityListCard = CreateCardPanel();
         activityListCard.Dock = DockStyle.Fill;
@@ -262,23 +299,32 @@ public sealed class DashboardForm : BaseForm
         mainGrid.Controls.Add(activityListCard, 0, 1);
         mainGrid.SetColumnSpan(activityListCard, 2);
 
-        var statusBar = new Panel
+        var statusBar = new TableLayoutPanel
         {
-            Dock = DockStyle.Bottom,
-            Height = 26,
-            BackColor = AppTheme.Surface
+            Dock = DockStyle.Fill,
+            BackColor = AppTheme.Surface,
+            ColumnCount = 2
         };
+        statusBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+        statusBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
         statusBar.Controls.Add(new Label
         {
             Text = "System Online",
             ForeColor = AppTheme.Success,
             AutoSize = true,
-            Location = new Point(8, 5)
-        });
+            Anchor = AnchorStyles.Left
+        }, 0, 0);
+        statusBar.Controls.Add(new Label
+        {
+            Text = "Logged in",
+            ForeColor = AppTheme.MutedText,
+            AutoSize = true,
+            Anchor = AnchorStyles.Right
+        }, 1, 0);
 
-        content.Controls.Add(mainGrid);
-        content.Controls.Add(header);
-        content.Controls.Add(statusBar);
-        return content;
+        content.Controls.Add(header, 0, 0);
+        content.Controls.Add(mainGrid, 0, 1);
+        content.Controls.Add(statusBar, 0, 2);
+        return (Panel)content;
     }
 }

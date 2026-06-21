@@ -24,25 +24,34 @@ public sealed class LoginForm : BaseForm
 
     private void BuildLayout()
     {
-        var root = new Panel
+        var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
+            BackColor = AppTheme.Tertiary,
             Padding = new Padding(24),
-            BackColor = AppTheme.Tertiary
+            ColumnCount = 1,
+            RowCount = 3
         };
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 130F));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
 
-        var headerPanel = new Panel
+        var headerPanel = new TableLayoutPanel
         {
-            Dock = DockStyle.Top,
-            Height = 140
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2
         };
+        headerPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 72F));
+        headerPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+
         var appTitle = new Label
         {
             Text = "KINETIC",
             Font = new Font(AppTheme.FontFamily, 34F, FontStyle.Bold),
             ForeColor = AppTheme.Neutral,
             AutoSize = true,
-            Location = new Point(500, 14)
+            Anchor = AnchorStyles.None
         };
         var appTagline = new Label
         {
@@ -50,17 +59,17 @@ public sealed class LoginForm : BaseForm
             Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Regular),
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
-            Location = new Point(506, 84)
+            Anchor = AnchorStyles.None
         };
-        headerPanel.Controls.Add(appTitle);
-        headerPanel.Controls.Add(appTagline);
+        headerPanel.Controls.Add(appTitle, 0, 0);
+        headerPanel.Controls.Add(appTagline, 0, 1);
 
         var cardsPanel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 1,
-            Padding = new Padding(24, 12, 24, 12)
+            Padding = new Padding(24, 8, 24, 8)
         };
         cardsPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         cardsPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
@@ -80,14 +89,14 @@ public sealed class LoginForm : BaseForm
         loginContent.Controls.Add(UiStyles.CreateCaption("Username"));
         UiStyles.StyleTextBox(_usernameTextBox);
         _usernameTextBox.PlaceholderText = "athlete@kinetic.com";
-        _usernameTextBox.Width = 430;
+        _usernameTextBox.Dock = DockStyle.Top;
         loginContent.Controls.Add(_usernameTextBox);
 
         loginContent.Controls.Add(UiStyles.CreateCaption("Password"));
         UiStyles.StyleTextBox(_passwordTextBox);
         _passwordTextBox.PlaceholderText = "Enter secure password";
         _passwordTextBox.PasswordChar = '*';
-        _passwordTextBox.Width = 430;
+        _passwordTextBox.Dock = DockStyle.Top;
         loginContent.Controls.Add(_passwordTextBox);
 
         _messageLabel.AutoSize = true;
@@ -96,7 +105,7 @@ public sealed class LoginForm : BaseForm
         _messageLabel.Margin = new Padding(0, 12, 0, 14);
         loginContent.Controls.Add(_messageLabel);
 
-        var loginButton = new Button { Text = "Log In   ->", Width = 430 };
+        var loginButton = new Button { Text = "Log In   ->", Dock = DockStyle.Top };
         UiStyles.StylePrimaryButton(loginButton);
         loginButton.Click += (_, _) =>
         {
@@ -122,14 +131,14 @@ public sealed class LoginForm : BaseForm
         registerContent.Controls.Add(UiStyles.CreateCaption("Username"));
         UiStyles.StyleTextBox(_registerUsernameTextBox);
         _registerUsernameTextBox.PlaceholderText = "Choose a username";
-        _registerUsernameTextBox.Width = 430;
+        _registerUsernameTextBox.Dock = DockStyle.Top;
         registerContent.Controls.Add(_registerUsernameTextBox);
 
         registerContent.Controls.Add(UiStyles.CreateCaption("Password"));
         UiStyles.StyleTextBox(_registerPasswordTextBox);
         _registerPasswordTextBox.PlaceholderText = "Exactly 12 chars";
         _registerPasswordTextBox.PasswordChar = '*';
-        _registerPasswordTextBox.Width = 430;
+        _registerPasswordTextBox.Dock = DockStyle.Top;
         registerContent.Controls.Add(_registerPasswordTextBox);
 
         var registerHint = new Label
@@ -141,7 +150,7 @@ public sealed class LoginForm : BaseForm
         };
         registerContent.Controls.Add(registerHint);
 
-        var registerButton = new Button { Text = "Open Full Registration +", Width = 430 };
+        var registerButton = new Button { Text = "Open Full Registration +", Dock = DockStyle.Top };
         UiStyles.StylePrimaryButton(registerButton);
         registerButton.Click += (_, _) =>
         {
@@ -155,30 +164,33 @@ public sealed class LoginForm : BaseForm
         cardsPanel.Controls.Add(loginCard, 0, 0);
         cardsPanel.Controls.Add(registerCard, 1, 0);
 
-        var statusBar = new Panel
+        var statusBar = new TableLayoutPanel
         {
-            Dock = DockStyle.Bottom,
-            Height = 28,
-            BackColor = AppTheme.Surface
+            Dock = DockStyle.Fill,
+            BackColor = AppTheme.Surface,
+            ColumnCount = 2,
+            RowCount = 1
         };
+        statusBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        statusBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         statusBar.Controls.Add(new Label
         {
             Text = "System Online",
             ForeColor = AppTheme.Success,
             AutoSize = true,
-            Location = new Point(10, 6)
-        });
+            Anchor = AnchorStyles.Left
+        }, 0, 0);
         statusBar.Controls.Add(new Label
         {
             Text = "v1.2.0",
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
-            Location = new Point(1115, 6)
-        });
+            Anchor = AnchorStyles.Right
+        }, 1, 0);
 
-        root.Controls.Add(cardsPanel);
-        root.Controls.Add(headerPanel);
-        root.Controls.Add(statusBar);
+        root.Controls.Add(headerPanel, 0, 0);
+        root.Controls.Add(cardsPanel, 0, 1);
+        root.Controls.Add(statusBar, 0, 2);
         Controls.Add(root);
     }
 
