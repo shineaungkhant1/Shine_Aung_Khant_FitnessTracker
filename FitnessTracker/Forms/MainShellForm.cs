@@ -111,8 +111,8 @@ public sealed class MainShellForm : BaseForm
         logoutButton.Click += (_, _) =>
         {
             _appService.Logout();
-            var auth = new AuthForm(_appService, new ActivityDefinitionFactory());
-            auth.Show();
+            var login = new LoginScreenForm(_appService, new ActivityDefinitionFactory());
+            login.Show();
             Close();
         };
 
