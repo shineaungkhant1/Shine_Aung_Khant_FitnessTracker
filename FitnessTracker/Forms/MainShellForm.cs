@@ -241,6 +241,8 @@ public sealed class MainShellForm : BaseForm
         var goal = _appService.GetGoal();
         var goalStatus = _appService.IsGoalAchieved() ? "Achieved" : "In Progress";
         var progressPercent = goal <= 0 ? 0 : Math.Min(100, (int)Math.Round((totalCalories / goal) * 100));
+        var totalCaloriesText = FormatCompactNumber(totalCalories);
+        var goalText = FormatCompactNumber(goal);
 
         var page = new TableLayoutPanel
         {
@@ -250,7 +252,7 @@ public sealed class MainShellForm : BaseForm
         };
         page.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 68));
         page.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
-        page.RowStyles.Add(new RowStyle(SizeType.Absolute, 220));
+        page.RowStyles.Add(new RowStyle(SizeType.Absolute, 235));
         page.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         var summaryCard = CreateCardPanel();
@@ -279,9 +281,9 @@ public sealed class MainShellForm : BaseForm
         }, 0, 0);
         leftBlock.Controls.Add(new Label
         {
-            Text = $"{totalCalories:F1} / {goal:F1} kcal",
+            Text = $"{totalCaloriesText} / {goalText} kcal",
             ForeColor = AppTheme.Neutral,
-            Font = new Font(AppTheme.FontFamily, 32F, FontStyle.Bold),
+            Font = new Font(AppTheme.FontFamily, 30F, FontStyle.Bold),
             AutoSize = true
         }, 0, 1);
         leftBlock.Controls.Add(new Label
@@ -333,7 +335,8 @@ public sealed class MainShellForm : BaseForm
         var ring = new CircularProgressControl
         {
             ProgressPercent = progressPercent,
-            Anchor = AnchorStyles.None
+            Anchor = AnchorStyles.None,
+            Size = new Size(150, 150)
         };
         rightBlock.Controls.Add(ring, 0, 0);
 
@@ -344,9 +347,9 @@ public sealed class MainShellForm : BaseForm
         var right = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        var totalCaloriesCard = UiStyles.CreateMetricCard("TOTAL CALORIES", $"{totalCalories:F1}", "kcal");
+        var totalCaloriesCard = UiStyles.CreateMetricCard("TOTAL CALORIES", totalCaloriesText, "kcal");
         totalCaloriesCard.Dock = DockStyle.Fill;
-        var goalTargetCard = UiStyles.CreateMetricCard("GOAL TARGET", $"{goal:F1}", "kcal");
+        var goalTargetCard = UiStyles.CreateMetricCard("GOAL TARGET", goalText, "kcal");
         goalTargetCard.Dock = DockStyle.Fill;
         right.Controls.Add(totalCaloriesCard, 0, 0);
         right.Controls.Add(goalTargetCard, 0, 1);
@@ -382,14 +385,55 @@ public sealed class MainShellForm : BaseForm
         {
             foreach (var record in recent)
             {
-                recentLayout.Controls.Add(new Label
+                var rowCard = new Panel
                 {
-                    Text = $"{record.ActivityName}   •   {record.Calories:F1} kcal   •   {record.LoggedAt:g}",
-                    ForeColor = AppTheme.MutedText,
-                    Font = new Font(AppTheme.FontFamily, 9.5F),
+                    BackColor = AppTheme.SurfaceSoft,
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Height = 54,
+                    Dock = DockStyle.Top,
+                    Margin = new Padding(0, 8, 0, 0),
+                    Padding = new Padding(12, 8, 12, 8)
+                };
+
+                var rowLayout = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 3,
+                    RowCount = 1
+                };
+                rowLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+                rowLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+                rowLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+
+                rowLayout.Controls.Add(new Label
+                {
+                    Text = record.ActivityName,
+                    ForeColor = AppTheme.Neutral,
+                    Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Bold),
                     AutoSize = true,
-                    Margin = new Padding(0, 8, 0, 0)
-                });
+                    Anchor = AnchorStyles.Left
+                }, 0, 0);
+
+                rowLayout.Controls.Add(new Label
+                {
+                    Text = $"{record.Calories:F1} kcal",
+                    ForeColor = AppTheme.Primary,
+                    Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Bold),
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Left
+                }, 1, 0);
+
+                rowLayout.Controls.Add(new Label
+                {
+                    Text = record.LoggedAt.ToString("g"),
+                    ForeColor = AppTheme.MutedText,
+                    Font = new Font(AppTheme.FontFamily, 9.5F, FontStyle.Regular),
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Right
+                }, 2, 0);
+
+                rowCard.Controls.Add(rowLayout);
+                recentLayout.Controls.Add(rowCard);
             }
         }
         recentCard.Controls.Add(recentLayout);
@@ -421,7 +465,7 @@ public sealed class MainShellForm : BaseForm
 
         var currentGoal = new Label
         {
-            Text = $"Current Goal: {_appService.GetGoal():F1} kcal",
+            Text = $"Current Goal: {FormatCompactNumber(_appService.GetGoal())} kcal",
             ForeColor = AppTheme.Primary,
             AutoSize = true
         };
@@ -448,7 +492,7 @@ public sealed class MainShellForm : BaseForm
 
             if (_appService.SetGoal(goalValue, out var message))
             {
-                currentGoal.Text = $"Current Goal: {_appService.GetGoal():F1} kcal";
+                currentGoal.Text = $"Current Goal: {FormatCompactNumber(_appService.GetGoal())} kcal";
                 messageLabel.ForeColor = AppTheme.Success;
                 messageLabel.Text = message;
                 return;
@@ -620,6 +664,40 @@ public sealed class MainShellForm : BaseForm
         UiStyles.StyleSidebarButton(_goalsNav, activeButton == _goalsNav);
         UiStyles.StyleSidebarButton(_activityNav, activeButton == _activityNav);
         UiStyles.StyleSidebarButton(_helpNav, activeButton == _helpNav);
+    }
+
+    private static string FormatCompactNumber(double value)
+    {
+        var absolute = Math.Abs(value);
+        var suffix = "";
+        var scaled = value;
+
+        if (absolute >= 1_000_000_000_000)
+        {
+            scaled = value / 1_000_000_000_000d;
+            suffix = "T";
+        }
+        else if (absolute >= 1_000_000_000)
+        {
+            scaled = value / 1_000_000_000d;
+            suffix = "B";
+        }
+        else if (absolute >= 1_000_000)
+        {
+            scaled = value / 1_000_000d;
+            suffix = "M";
+        }
+        else if (absolute >= 1_000)
+        {
+            scaled = value / 1_000d;
+            suffix = "K";
+        }
+        else
+        {
+            return value.ToString("N1");
+        }
+
+        return $"{scaled:0.0}{suffix}";
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)

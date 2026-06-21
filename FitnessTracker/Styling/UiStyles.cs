@@ -94,9 +94,9 @@ public static class UiStyles
             ColumnCount = 1,
             RowCount = 3
         };
-        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent, 38F));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
 
         content.Controls.Add(new Label
         {
@@ -110,7 +110,7 @@ public static class UiStyles
             Text = value,
             ForeColor = AppTheme.Neutral,
             AutoSize = true,
-            Font = new Font(AppTheme.FontFamily, 16F, FontStyle.Bold),
+            Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
             Margin = new Padding(0, 8, 0, 4)
         }, 0, 1);
         content.Controls.Add(new Label
@@ -122,7 +122,6 @@ public static class UiStyles
         }, 0, 2);
 
         panel.Controls.Add(content);
-        panel.Height = 112;
         return panel;
     }
 
