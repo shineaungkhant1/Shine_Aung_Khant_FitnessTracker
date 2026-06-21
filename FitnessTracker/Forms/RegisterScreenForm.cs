@@ -35,9 +35,30 @@ public sealed class RegisterScreenForm : BaseForm
         var header = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 1,
+            ColumnCount = 3,
             RowCount = 2
         };
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
+
+        var backArrowButton = new Button
+        {
+            Text = "← Back",
+            Width = 78,
+            Height = 34,
+            Anchor = AnchorStyles.Left | AnchorStyles.Top,
+            Margin = new Padding(0, 8, 0, 0)
+        };
+        UiStyles.StyleSecondaryButton(backArrowButton);
+        backArrowButton.Click += (_, _) =>
+        {
+            var loginForm = new LoginScreenForm(_appService, _activityDefinitionFactory);
+            loginForm.Show();
+            Hide();
+        };
+        header.Controls.Add(backArrowButton, 0, 0);
+
         header.Controls.Add(new Label
         {
             Text = "KINETIC",
@@ -45,7 +66,7 @@ public sealed class RegisterScreenForm : BaseForm
             Font = new Font(AppTheme.FontFamily, 34F, FontStyle.Bold),
             AutoSize = true,
             Anchor = AnchorStyles.None
-        }, 0, 0);
+        }, 1, 0);
         header.Controls.Add(new Label
         {
             Text = "Create your fitness account",
@@ -53,7 +74,7 @@ public sealed class RegisterScreenForm : BaseForm
             Font = new Font(AppTheme.FontFamily, 11F),
             AutoSize = true,
             Anchor = AnchorStyles.None
-        }, 0, 1);
+        }, 1, 1);
 
         var cardWrap = new TableLayoutPanel
         {

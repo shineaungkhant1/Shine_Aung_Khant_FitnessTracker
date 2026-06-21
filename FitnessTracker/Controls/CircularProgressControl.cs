@@ -21,7 +21,7 @@ public sealed class CircularProgressControl : Control
     {
         DoubleBuffered = true;
         Size = new Size(150, 150);
-        BackColor = Color.Transparent;
+        BackColor = AppTheme.Surface;
     }
 
     protected override void OnPaint(PaintEventArgs e)
