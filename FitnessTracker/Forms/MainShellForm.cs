@@ -373,19 +373,37 @@ public sealed class MainShellForm : BaseForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 8
+            RowCount = 2
         };
+        recentLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        recentLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         recentLayout.Controls.Add(new Label
         {
             Text = "Recent Activities",
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
             AutoSize = true
-        });
+        }, 0, 0);
+
+        var scrollHost = new Panel
+        {
+            Dock = DockStyle.Fill,
+            AutoScroll = true,
+            BackColor = AppTheme.Surface
+        };
+        var activitiesList = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            ColumnCount = 1,
+            RowCount = 0
+        };
+        scrollHost.Controls.Add(activitiesList);
+
         var recent = _appService.GetRecentActivities(6);
         if (recent.Count == 0)
         {
-            recentLayout.Controls.Add(new Label
+            activitiesList.Controls.Add(new Label
             {
                 Text = "No activities logged yet. Use Log Activity to begin.",
                 ForeColor = AppTheme.MutedText,
@@ -396,7 +414,7 @@ public sealed class MainShellForm : BaseForm
         }
         else
         {
-            foreach (var record in recent)
+            foreach (var record in _appService.GetRecentActivities(100))
             {
                 var rowCard = new Panel
                 {
@@ -446,9 +464,10 @@ public sealed class MainShellForm : BaseForm
                 }, 2, 0);
 
                 rowCard.Controls.Add(rowLayout);
-                recentLayout.Controls.Add(rowCard);
+                activitiesList.Controls.Add(rowCard);
             }
         }
+        recentLayout.Controls.Add(scrollHost, 0, 1);
         recentCard.Controls.Add(recentLayout);
 
         page.Controls.Add(summaryCard, 0, 0);
@@ -638,25 +657,146 @@ public sealed class MainShellForm : BaseForm
     private void ShowHelp()
     {
         SetActiveNavigation(_helpNav);
-        _headerTitle.Text = "Help & Guidance";
-        _headerSubtitle.Text = "Quick guidance for using each feature.";
+        _headerTitle.Text = "Help & Support";
+        _headerSubtitle.Text = "Find guidance and resolve common user issues quickly.";
 
-        var page = CreateCardPanel();
-        page.Dock = DockStyle.Fill;
-        page.Controls.Add(new Label
+        var page = new TableLayoutPanel
         {
-            Text = "1) Register with letters/numbers username and a password with upper/lower case letters.\n" +
-                   "2) Login. After 3 wrong attempts account is temporarily locked.\n" +
-                   "3) Set your goal in Goals.\n" +
-                   "4) Log activities with all 3 metrics.\n" +
-                   "5) Check dashboard for total calories and goal achievement.",
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 2
+        };
+        page.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
+        page.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+        page.RowStyles.Add(new RowStyle(SizeType.Percent, 72F));
+        page.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
+
+        var faqCard = CreateCardPanel();
+        faqCard.Dock = DockStyle.Fill;
+        var faqLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 7
+        };
+        faqLayout.Controls.Add(UiStyles.CreateSectionTitle("Frequently Asked Questions"));
+        faqLayout.Controls.Add(CreateHelpRow("How do I create an account?",
+            "Use Register with letters/numbers username and exactly 12-char password."));
+        faqLayout.Controls.Add(CreateHelpRow("Why am I blocked from login?",
+            "After 3 failed attempts, login is temporarily locked for security."));
+        faqLayout.Controls.Add(CreateHelpRow("How do I set my goal?",
+            "Open Goals page, enter calorie target, and click Save Goal."));
+        faqLayout.Controls.Add(CreateHelpRow("How do I record activities?",
+            "Use Log Activity, select one of 6 activities, and enter all 3 metrics."));
+        faqLayout.Controls.Add(CreateHelpRow("Where can I see progress?",
+            "Dashboard shows total calories, goal target, progress %, and recent logs."));
+        faqCard.Controls.Add(faqLayout);
+
+        var docsCard = CreateCardPanel();
+        docsCard.Dock = DockStyle.Fill;
+        var docsLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 6
+        };
+        docsLayout.Controls.Add(UiStyles.CreateSectionTitle("Quick Actions"));
+
+        var toGoalsButton = new Button { Text = "Go to Goals", Width = 190 };
+        UiStyles.StylePrimaryButton(toGoalsButton);
+        toGoalsButton.Click += (_, _) =>
+        {
+            SetActiveNavigation(_goalsNav);
+            ShowGoals();
+        };
+
+        var toActivityButton = new Button { Text = "Go to Log Activity", Width = 190 };
+        UiStyles.StyleSecondaryButton(toActivityButton);
+        toActivityButton.Click += (_, _) =>
+        {
+            SetActiveNavigation(_activityNav);
+            ShowActivityLogger();
+        };
+
+        var toDashboardButton = new Button { Text = "Back to Dashboard", Width = 190 };
+        UiStyles.StyleSecondaryButton(toDashboardButton);
+        toDashboardButton.Click += (_, _) =>
+        {
+            SetActiveNavigation(_dashboardNav);
+            ShowDashboard();
+        };
+
+        docsLayout.Controls.Add(new Label
+        {
+            Text = "Need to continue quickly?",
             ForeColor = AppTheme.MutedText,
-            Font = new Font(AppTheme.FontFamily, 11F),
             AutoSize = true,
-            Location = new Point(20, 24)
+            Margin = new Padding(0, 2, 0, 10)
+        });
+        docsLayout.Controls.Add(toGoalsButton);
+        docsLayout.Controls.Add(toActivityButton);
+        docsLayout.Controls.Add(toDashboardButton);
+        docsLayout.Controls.Add(new Label
+        {
+            Text = "Tip: Test invalid inputs for Task 2 evidence.",
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 9.5F, FontStyle.Bold),
+            AutoSize = true,
+            Margin = new Padding(0, 12, 0, 0)
+        });
+        docsCard.Controls.Add(docsLayout);
+
+        var supportCard = CreateCardPanel();
+        supportCard.Dock = DockStyle.Fill;
+        supportCard.Controls.Add(new Label
+        {
+            Text = "Support Note:\nIf something fails, check the on-screen message and retry with valid inputs.",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular),
+            AutoSize = true,
+            MaximumSize = new Size(900, 0),
+            Location = new Point(20, 20)
         });
 
+        page.Controls.Add(faqCard, 0, 0);
+        page.Controls.Add(docsCard, 1, 0);
+        page.Controls.Add(supportCard, 0, 1);
+        page.SetColumnSpan(supportCard, 2);
+
         RenderPage(page);
+    }
+
+    private static Control CreateHelpRow(string question, string answer)
+    {
+        var wrapper = new Panel
+        {
+            Dock = DockStyle.Top,
+            Height = 66,
+            BackColor = AppTheme.SurfaceSoft,
+            BorderStyle = BorderStyle.FixedSingle,
+            Padding = new Padding(10, 8, 10, 8),
+            Margin = new Padding(0, 0, 0, 8)
+        };
+
+        wrapper.Controls.Add(new Label
+        {
+            Text = question,
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(10, 8)
+        });
+        wrapper.Controls.Add(new Label
+        {
+            Text = answer,
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 9.2F, FontStyle.Regular),
+            AutoSize = true,
+            MaximumSize = new Size(700, 0),
+            Location = new Point(10, 30)
+        });
+
+        return wrapper;
     }
 
     private void RenderPage(Control page)
