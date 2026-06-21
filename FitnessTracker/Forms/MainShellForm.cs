@@ -679,7 +679,7 @@ public sealed class MainShellForm : BaseForm
             ColumnCount = 1,
             RowCount = 2
         };
-        faqLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        faqLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
         faqLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         faqLayout.Controls.Add(UiStyles.CreateSectionTitle("Frequently Asked Questions"), 0, 0);
 
@@ -687,7 +687,8 @@ public sealed class MainShellForm : BaseForm
         {
             Dock = DockStyle.Fill,
             AutoScroll = true,
-            BackColor = AppTheme.Surface
+            BackColor = AppTheme.Surface,
+            Padding = new Padding(0, 4, 0, 0)
         };
         var faqItems = new TableLayoutPanel
         {
@@ -791,30 +792,46 @@ public sealed class MainShellForm : BaseForm
         var wrapper = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 66,
             BackColor = AppTheme.SurfaceSoft,
             BorderStyle = BorderStyle.FixedSingle,
             Padding = new Padding(10, 8, 10, 8),
             Margin = new Padding(0, 0, 0, 8)
         };
 
-        wrapper.Controls.Add(new Label
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2,
+            AutoSize = true
+        };
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+        var questionLabel = new Label
         {
             Text = question,
             ForeColor = AppTheme.Neutral,
             Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Bold),
             AutoSize = true,
-            Location = new Point(10, 8)
-        });
-        wrapper.Controls.Add(new Label
+            Margin = new Padding(0, 0, 0, 4)
+        };
+        var answerLabel = new Label
         {
             Text = answer,
             ForeColor = AppTheme.MutedText,
             Font = new Font(AppTheme.FontFamily, 9.2F, FontStyle.Regular),
             AutoSize = true,
-            MaximumSize = new Size(700, 0),
-            Location = new Point(10, 30)
-        });
+            MaximumSize = new Size(760, 0),
+            Margin = new Padding(0)
+        };
+
+        layout.Controls.Add(questionLabel, 0, 0);
+        layout.Controls.Add(answerLabel, 0, 1);
+        wrapper.Controls.Add(layout);
+
+        var preferredHeight = Math.Max(72, layout.GetPreferredSize(new Size(760, 0)).Height + 20);
+        wrapper.Height = preferredHeight;
 
         return wrapper;
     }
