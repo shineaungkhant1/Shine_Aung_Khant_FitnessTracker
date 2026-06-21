@@ -240,9 +240,15 @@ public sealed class MainShellForm : BaseForm
         var totalCalories = _appService.GetTotalCalories();
         var goal = _appService.GetGoal();
         var goalStatus = _appService.IsGoalAchieved() ? "Achieved" : "In Progress";
-        var progressPercent = goal <= 0 ? 0 : Math.Min(100, (int)Math.Round((totalCalories / goal) * 100));
+        var rawProgressPercent = goal <= 0 ? 0 : (totalCalories / goal) * 100d;
+        var progressPercent = goal <= 0 ? 0 : Math.Max(0, (int)Math.Round(rawProgressPercent));
+        var visualProgressPercent = Math.Min(100, progressPercent);
         var totalCaloriesText = FormatCompactNumber(totalCalories);
         var goalText = FormatCompactNumber(goal);
+        var deltaCalories = totalCalories - goal;
+        var progressMessage = deltaCalories >= 0
+            ? $"Exceeded by {FormatCompactNumber(deltaCalories)} kcal"
+            : $"Remaining {FormatCompactNumber(Math.Abs(deltaCalories))} kcal";
 
         var page = new TableLayoutPanel
         {
@@ -315,7 +321,7 @@ public sealed class MainShellForm : BaseForm
             Height = 10,
             Dock = DockStyle.Left
         };
-        progressFill.Width = Math.Max(0, Math.Min(320, (int)(progressPercent * 3.2)));
+        progressFill.Width = Math.Max(0, Math.Min(320, (int)(visualProgressPercent * 3.2)));
         progressTrack.Controls.Add(progressFill);
         leftBlock.Controls.Add(progressTrack, 0, 4);
         leftBlock.Controls.Add(new Label
@@ -325,6 +331,13 @@ public sealed class MainShellForm : BaseForm
             AutoSize = true,
             Margin = new Padding(0, 8, 0, 0)
         }, 0, 5);
+        leftBlock.Controls.Add(new Label
+        {
+            Text = progressMessage,
+            ForeColor = deltaCalories >= 0 ? AppTheme.Success : AppTheme.MutedText,
+            AutoSize = true,
+            Margin = new Padding(0, 4, 0, 0)
+        }, 0, 6);
 
         var rightBlock = new TableLayoutPanel
         {
@@ -334,7 +347,7 @@ public sealed class MainShellForm : BaseForm
         };
         var ring = new CircularProgressControl
         {
-            ProgressPercent = progressPercent,
+            ProgressPercent = visualProgressPercent,
             Anchor = AnchorStyles.None,
             Size = new Size(150, 150)
         };
