@@ -88,37 +88,41 @@ public static class UiStyles
             Margin = new Padding(0, 0, 0, 12)
         };
 
-        var titleLabel = new Label
+        var content = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 3
+        };
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+        content.Controls.Add(new Label
         {
             Text = title,
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
             Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Bold)
-        };
-        var valueLabel = new Label
+        }, 0, 0);
+        content.Controls.Add(new Label
         {
             Text = value,
             ForeColor = AppTheme.Neutral,
             AutoSize = true,
-            Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
-            Margin = new Padding(0, 8, 0, 6)
-        };
-        var subtitleLabel = new Label
+            Font = new Font(AppTheme.FontFamily, 16F, FontStyle.Bold),
+            Margin = new Padding(0, 8, 0, 4)
+        }, 0, 1);
+        content.Controls.Add(new Label
         {
             Text = subtitle,
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
             Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Regular)
-        };
+        }, 0, 2);
 
-        panel.Controls.Add(subtitleLabel);
-        panel.Controls.Add(valueLabel);
-        panel.Controls.Add(titleLabel);
-
-        subtitleLabel.Location = new Point(14, 68);
-        valueLabel.Location = new Point(14, 34);
-        titleLabel.Location = new Point(14, 14);
-        panel.Height = 106;
+        panel.Controls.Add(content);
+        panel.Height = 112;
         return panel;
     }
 

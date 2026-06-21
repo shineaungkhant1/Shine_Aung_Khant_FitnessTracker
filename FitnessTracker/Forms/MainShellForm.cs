@@ -350,12 +350,12 @@ public sealed class MainShellForm : BaseForm
         var right = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        var activeMinutes = UiStyles.CreateMetricCard("ACTIVE MINUTES", $"{Math.Max(1, (int)Math.Round(totalCalories / 2.5))}", "min");
-        activeMinutes.Dock = DockStyle.Fill;
-        var avgSleep = UiStyles.CreateMetricCard("AVG SLEEP", "7.2", "hours");
-        avgSleep.Dock = DockStyle.Fill;
-        right.Controls.Add(activeMinutes, 0, 0);
-        right.Controls.Add(avgSleep, 0, 1);
+        var totalCaloriesCard = UiStyles.CreateMetricCard("TOTAL CALORIES", $"{totalCalories:F1}", "kcal");
+        totalCaloriesCard.Dock = DockStyle.Fill;
+        var goalTargetCard = UiStyles.CreateMetricCard("GOAL TARGET", $"{goal:F1}", "kcal");
+        goalTargetCard.Dock = DockStyle.Fill;
+        right.Controls.Add(totalCaloriesCard, 0, 0);
+        right.Controls.Add(goalTargetCard, 0, 1);
 
         var recentCard = CreateCardPanel();
         recentCard.Dock = DockStyle.Fill;
