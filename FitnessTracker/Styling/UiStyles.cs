@@ -92,32 +92,39 @@ public static class UiStyles
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 3
+            RowCount = 4
         };
-        content.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
-        content.RowStyles.Add(new RowStyle(SizeType.Percent, 38F));
-        content.RowStyles.Add(new RowStyle(SizeType.Percent, 28F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
         content.Controls.Add(new Label
         {
             Text = title,
             ForeColor = AppTheme.MutedText,
-            AutoSize = true,
+            AutoSize = false,
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.BottomLeft,
             Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Bold)
         }, 0, 0);
         content.Controls.Add(new Label
         {
             Text = value,
             ForeColor = AppTheme.Neutral,
-            AutoSize = true,
+            AutoSize = false,
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleLeft,
             Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
-            Margin = new Padding(0, 8, 0, 4)
+            Margin = new Padding(0)
         }, 0, 1);
         content.Controls.Add(new Label
         {
             Text = subtitle,
             ForeColor = AppTheme.MutedText,
-            AutoSize = true,
+            AutoSize = false,
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.TopLeft,
             Font = new Font(AppTheme.FontFamily, 9F, FontStyle.Regular)
         }, 0, 2);
 
