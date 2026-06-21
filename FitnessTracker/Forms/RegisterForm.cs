@@ -12,27 +12,23 @@ public sealed class RegisterForm : BaseForm
         _activityDefinitionFactory = activityDefinitionFactory;
 
         Text = "Fitness Tracker - Register";
-        ClientSize = new Size(920, 600);
+        ClientSize = new Size(980, 680);
 
         BuildLayout();
     }
 
     private void BuildLayout()
     {
-        var root = new TableLayoutPanel
+        var root = new Panel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 3,
-            RowCount = 1,
             Padding = new Padding(24),
             BackColor = AppTheme.Tertiary
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
 
         var card = CreateCardPanel();
-        card.Dock = DockStyle.Fill;
+        card.Size = new Size(620, 520);
+        card.Location = new Point(170, 72);
 
         var content = new TableLayoutPanel
         {
@@ -41,7 +37,14 @@ public sealed class RegisterForm : BaseForm
             RowCount = 12
         };
 
-        content.Controls.Add(UiStyles.CreateSectionTitle("Create your fitness account"));
+        content.Controls.Add(UiStyles.CreateSectionTitle("Create your Kinetic account"));
+        content.Controls.Add(new Label
+        {
+            Text = "Join the training workspace and track your progress.",
+            AutoSize = true,
+            ForeColor = AppTheme.MutedText,
+            Margin = new Padding(0, 0, 0, 14)
+        });
         content.Controls.Add(UiStyles.CreateCaption("Username"));
         var usernameTextBox = new TextBox { PlaceholderText = "Letters and numbers only", Width = 440 };
         UiStyles.StyleTextBox(usernameTextBox);
@@ -71,7 +74,7 @@ public sealed class RegisterForm : BaseForm
         {
             AutoSize = true,
             ForeColor = AppTheme.MutedText,
-            Text = "Validation and database registration will be connected in next step.",
+            Text = "Rules: Username letters/numbers, password exactly 12 chars with upper/lowercase.",
             Margin = new Padding(0, 12, 0, 14)
         };
         content.Controls.Add(infoLabel);
@@ -83,7 +86,7 @@ public sealed class RegisterForm : BaseForm
             FlowDirection = FlowDirection.LeftToRight
         };
 
-        var createButton = new Button { Text = "Create Account", Width = 145 };
+        var createButton = new Button { Text = "Create Account", Width = 210 };
         UiStyles.StylePrimaryButton(createButton);
         createButton.Click += (_, _) =>
         {
@@ -94,7 +97,7 @@ public sealed class RegisterForm : BaseForm
                 MessageBoxIcon.Information);
         };
 
-        var backButton = new Button { Text = "Back to Login", Width = 145 };
+        var backButton = new Button { Text = "Back to Login", Width = 210 };
         UiStyles.StyleSecondaryButton(backButton);
         backButton.Click += (_, _) =>
         {
@@ -108,7 +111,15 @@ public sealed class RegisterForm : BaseForm
         content.Controls.Add(actionPanel);
 
         card.Controls.Add(content);
-        root.Controls.Add(card, 1, 0);
+        root.Controls.Add(card);
+        root.Controls.Add(new Label
+        {
+            Text = "KINETIC",
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 20F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(430, 20)
+        });
         Controls.Add(root);
     }
 }

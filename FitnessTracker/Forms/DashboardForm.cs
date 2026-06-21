@@ -26,88 +26,93 @@ public sealed class DashboardForm : BaseForm
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 1,
-            Padding = new Padding(24),
             BackColor = AppTheme.Tertiary
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-        var leftCard = CreateCardPanel();
-        leftCard.Dock = DockStyle.Fill;
+        var sidebar = BuildSidebar();
+        var content = BuildContentArea();
 
-        var leftContent = new TableLayoutPanel
+        root.Controls.Add(sidebar, 0, 0);
+        root.Controls.Add(content, 1, 0);
+        Controls.Add(root);
+    }
+
+    private Panel BuildSidebar()
+    {
+        var sidebar = new Panel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 12
+            BackColor = AppTheme.Sidebar,
+            Padding = new Padding(12)
         };
 
-        leftContent.Controls.Add(UiStyles.CreateSectionTitle($"Welcome, {_displayName}"));
-
-        var introLabel = new Label
+        var profile = new Panel
         {
-            Text = "Set your calories target and monitor progress.",
-            AutoSize = true,
-            ForeColor = AppTheme.MutedText,
-            Margin = new Padding(0, 0, 0, 16)
+            Dock = DockStyle.Top,
+            Height = 86,
+            BackColor = AppTheme.Sidebar
         };
-        leftContent.Controls.Add(introLabel);
+        profile.Controls.Add(new Label
+        {
+            Text = _displayName,
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(56, 18)
+        });
+        profile.Controls.Add(new Label
+        {
+            Text = "PRO MEMBER",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 8.5F, FontStyle.Regular),
+            AutoSize = true,
+            Location = new Point(56, 42)
+        });
 
-        leftContent.Controls.Add(UiStyles.CreateCaption("Calories Goal"));
-        var goalTextBox = new TextBox { Width = 320, PlaceholderText = "e.g. 300" };
-        UiStyles.StyleTextBox(goalTextBox);
-        leftContent.Controls.Add(goalTextBox);
-
-        var setGoalButton = new Button { Text = "Set Goal", Width = 120 };
-        UiStyles.StylePrimaryButton(setGoalButton);
-        leftContent.Controls.Add(setGoalButton);
-
-        var statPanel = new Panel
+        var avatar = new Panel
         {
             BackColor = AppTheme.SurfaceSoft,
-            BorderStyle = BorderStyle.FixedSingle,
-            Width = 520,
-            Height = 140,
-            Padding = new Padding(16),
-            Margin = new Padding(0, 18, 0, 18)
+            Size = new Size(36, 36),
+            Location = new Point(10, 16)
         };
+        profile.Controls.Add(avatar);
 
-        var stats = new Label
+        var menu = new FlowLayoutPanel
         {
-            Text = "Total Calories Burned: 0\r\nGoal Status: Not started",
-            AutoSize = true,
-            ForeColor = AppTheme.Neutral,
-            Font = new Font(AppTheme.FontFamily, 10.5F, FontStyle.Regular)
+            Dock = DockStyle.Top,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
+            Height = 280
         };
-        statPanel.Controls.Add(stats);
-        leftContent.Controls.Add(statPanel);
 
-        var recordButton = new Button { Text = "Record Activity", Width = 170 };
-        UiStyles.StylePrimaryButton(recordButton);
-        recordButton.Click += (_, _) =>
+        var dashboardButton = new Button { Text = "Dashboard", Width = 190 };
+        UiStyles.StyleSidebarButton(dashboardButton, true);
+
+        var goalsButton = new Button { Text = "Goals", Width = 190 };
+        UiStyles.StyleSidebarButton(goalsButton);
+
+        var logActivityButton = new Button { Text = "Log Activity", Width = 190 };
+        UiStyles.StyleSidebarButton(logActivityButton);
+        logActivityButton.Click += (_, _) =>
         {
             var activityForm = new ActivityForm(_activityDefinitionFactory, _displayName);
             activityForm.Show();
             Hide();
         };
-        leftContent.Controls.Add(recordButton);
 
-        leftCard.Controls.Add(leftContent);
+        var helpButton = new Button { Text = "Help", Width = 190 };
+        UiStyles.StyleSidebarButton(helpButton);
 
-        var rightCard = CreateCardPanel();
-        rightCard.Dock = DockStyle.Fill;
+        menu.Controls.Add(dashboardButton);
+        menu.Controls.Add(goalsButton);
+        menu.Controls.Add(logActivityButton);
+        menu.Controls.Add(helpButton);
 
-        var rightContent = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 4
-        };
-
-        rightContent.Controls.Add(UiStyles.CreateSectionTitle("Quick Actions"));
-
-        var logoutButton = new Button { Text = "Logout", Width = 130 };
+        var logoutButton = new Button { Text = "Settings / Logout", Width = 190 };
         UiStyles.StyleSecondaryButton(logoutButton);
+        logoutButton.Location = new Point(12, 565);
         logoutButton.Click += (_, _) =>
         {
             var loginForm = new LoginForm(_activityDefinitionFactory);
@@ -115,21 +120,165 @@ public sealed class DashboardForm : BaseForm
             Hide();
         };
 
-        var tipLabel = new Label
+        sidebar.Controls.Add(logoutButton);
+        sidebar.Controls.Add(menu);
+        sidebar.Controls.Add(profile);
+        return sidebar;
+    }
+
+    private Panel BuildContentArea()
+    {
+        var content = new Panel
         {
-            Text = "This dashboard UI is set. Next step is wiring database and business rules.",
-            AutoSize = true,
-            ForeColor = AppTheme.MutedText,
-            MaximumSize = new Size(280, 0),
-            Margin = new Padding(0, 0, 0, 18)
+            Dock = DockStyle.Fill,
+            BackColor = AppTheme.Tertiary,
+            Padding = new Padding(24)
         };
 
-        rightContent.Controls.Add(tipLabel);
-        rightContent.Controls.Add(logoutButton);
-        rightCard.Controls.Add(rightContent);
+        var header = new Panel
+        {
+            Dock = DockStyle.Top,
+            Height = 82
+        };
+        header.Controls.Add(new Label
+        {
+            Text = "Dashboard Overview",
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 26F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(0, 0)
+        });
+        header.Controls.Add(new Label
+        {
+            Text = $"Ready to crush your goals today, {_displayName}?",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Regular),
+            AutoSize = true,
+            Location = new Point(2, 46)
+        });
 
-        root.Controls.Add(leftCard, 0, 0);
-        root.Controls.Add(rightCard, 1, 0);
-        Controls.Add(root);
+        var logButton = new Button { Text = "+  Log Workout", Width = 140, Location = new Point(690, 18) };
+        UiStyles.StylePrimaryButton(logButton);
+        logButton.Click += (_, _) =>
+        {
+            var activityForm = new ActivityForm(_activityDefinitionFactory, _displayName);
+            activityForm.Show();
+            Hide();
+        };
+        header.Controls.Add(logButton);
+
+        var mainGrid = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 2,
+            Padding = new Padding(0, 12, 0, 0)
+        };
+        mainGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 68));
+        mainGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
+        mainGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 230));
+        mainGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        var goalCard = CreateCardPanel();
+        goalCard.Dock = DockStyle.Fill;
+        goalCard.Controls.Add(new Label
+        {
+            Text = "DAILY GOAL",
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 12F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(20, 18)
+        });
+        goalCard.Controls.Add(new Label
+        {
+            Text = "120 / 300 kcal",
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 33F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(20, 58)
+        });
+        goalCard.Controls.Add(new Label
+        {
+            Text = "Active calories",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 11F, FontStyle.Regular),
+            AutoSize = true,
+            Location = new Point(24, 126)
+        });
+        goalCard.Controls.Add(new Label
+        {
+            Text = "Goal Status: In Progress",
+            ForeColor = AppTheme.Success,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(24, 156)
+        });
+
+        var rightStats = new Panel { Dock = DockStyle.Fill };
+        var activeMinutesCard = UiStyles.CreateMetricCard("ACTIVE MINUTES", "345", "minutes");
+        activeMinutesCard.Dock = DockStyle.Top;
+        var sleepCard = UiStyles.CreateMetricCard("AVG SLEEP", "7.2", "hours");
+        sleepCard.Dock = DockStyle.Top;
+        rightStats.Controls.Add(sleepCard);
+        rightStats.Controls.Add(activeMinutesCard);
+
+        var activityListCard = CreateCardPanel();
+        activityListCard.Dock = DockStyle.Fill;
+        activityListCard.Controls.Add(new Label
+        {
+            Text = "Recent Activity",
+            ForeColor = AppTheme.Neutral,
+            Font = new Font(AppTheme.FontFamily, 14F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(20, 16)
+        });
+        activityListCard.Controls.Add(new Label
+        {
+            Text = "Morning Walk   |   3.2 km   |   250 kcal",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular),
+            AutoSize = true,
+            Location = new Point(24, 58)
+        });
+        activityListCard.Controls.Add(new Label
+        {
+            Text = "Laps Swimming  |   1.5 km   |   420 kcal",
+            ForeColor = AppTheme.MutedText,
+            Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular),
+            AutoSize = true,
+            Location = new Point(24, 90)
+        });
+        activityListCard.Controls.Add(new Label
+        {
+            Text = "Set your target in Goals and continue logging activities.",
+            ForeColor = AppTheme.Primary,
+            Font = new Font(AppTheme.FontFamily, 9.5F, FontStyle.Bold),
+            AutoSize = true,
+            Location = new Point(24, 130)
+        });
+
+        mainGrid.Controls.Add(goalCard, 0, 0);
+        mainGrid.Controls.Add(rightStats, 1, 0);
+        mainGrid.Controls.Add(activityListCard, 0, 1);
+        mainGrid.SetColumnSpan(activityListCard, 2);
+
+        var statusBar = new Panel
+        {
+            Dock = DockStyle.Bottom,
+            Height = 26,
+            BackColor = AppTheme.Surface
+        };
+        statusBar.Controls.Add(new Label
+        {
+            Text = "System Online",
+            ForeColor = AppTheme.Success,
+            AutoSize = true,
+            Location = new Point(8, 5)
+        });
+
+        content.Controls.Add(mainGrid);
+        content.Controls.Add(header);
+        content.Controls.Add(statusBar);
+        return content;
     }
 }

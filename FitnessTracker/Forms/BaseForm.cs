@@ -10,9 +10,9 @@ public class BaseForm : Form
         BackColor = AppTheme.Tertiary;
         ForeColor = AppTheme.Neutral;
         Font = new Font(AppTheme.FontFamily, 10F, FontStyle.Regular);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
-        MinimizeBox = false;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = true;
+        MinimizeBox = true;
     }
 
     protected Panel CreateCardPanel()
