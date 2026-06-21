@@ -677,19 +677,39 @@ public sealed class MainShellForm : BaseForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 7
+            RowCount = 2
         };
-        faqLayout.Controls.Add(UiStyles.CreateSectionTitle("Frequently Asked Questions"));
-        faqLayout.Controls.Add(CreateHelpRow("How do I create an account?",
+        faqLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        faqLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        faqLayout.Controls.Add(UiStyles.CreateSectionTitle("Frequently Asked Questions"), 0, 0);
+
+        var faqScrollHost = new Panel
+        {
+            Dock = DockStyle.Fill,
+            AutoScroll = true,
+            BackColor = AppTheme.Surface
+        };
+        var faqItems = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            ColumnCount = 1,
+            RowCount = 0
+        };
+        faqItems.Controls.Add(CreateHelpRow("How do I create an account?",
             "Use Register with letters/numbers username and exactly 12-char password."));
-        faqLayout.Controls.Add(CreateHelpRow("Why am I blocked from login?",
+        faqItems.Controls.Add(CreateHelpRow("Why am I blocked from login?",
             "After 3 failed attempts, login is temporarily locked for security."));
-        faqLayout.Controls.Add(CreateHelpRow("How do I set my goal?",
+        faqItems.Controls.Add(CreateHelpRow("How do I set my goal?",
             "Open Goals page, enter calorie target, and click Save Goal."));
-        faqLayout.Controls.Add(CreateHelpRow("How do I record activities?",
+        faqItems.Controls.Add(CreateHelpRow("How do I record activities?",
             "Use Log Activity, select one of 6 activities, and enter all 3 metrics."));
-        faqLayout.Controls.Add(CreateHelpRow("Where can I see progress?",
+        faqItems.Controls.Add(CreateHelpRow("Where can I see progress?",
             "Dashboard shows total calories, goal target, progress %, and recent logs."));
+        faqItems.Controls.Add(CreateHelpRow("What if metrics are invalid?",
+            "The app shows validation messages; enter positive numeric values for all metrics."));
+        faqScrollHost.Controls.Add(faqItems);
+        faqLayout.Controls.Add(faqScrollHost, 0, 1);
         faqCard.Controls.Add(faqLayout);
 
         var docsCard = CreateCardPanel();
