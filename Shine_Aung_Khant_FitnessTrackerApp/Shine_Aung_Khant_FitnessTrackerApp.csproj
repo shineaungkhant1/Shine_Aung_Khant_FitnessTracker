@@ -7,6 +7,9 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Shine_Aung_Khant_FitnessTrackerApp</AssemblyName>
+    <RootNamespace>Shine_Aung_Khant_FitnessTrackerApp</RootNamespace>
+    <Product>Shine_Aung_Khant_FitnessTrackerApp</Product>
   </PropertyGroup>
 
   <ItemGroup>
