@@ -168,7 +168,7 @@ public sealed class RegisterScreenForm : BaseForm
         form.Controls.Add(confirmBox);
         form.Controls.Add(new Label
         {
-            Text = "Password must be exactly 12 characters and include upper/lowercase letters.",
+            Text = "Password must include at least one uppercase and one lowercase letter.",
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
             Margin = new Padding(0, 8, 0, 8)
