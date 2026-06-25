@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using FitnessTracker.Models;
 using Microsoft.Data.Sqlite;
@@ -10,6 +11,10 @@ public sealed class AppService : IAppService
     private readonly string _connectionString;
     private const int MaxFailedAttempts = 3;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(5);
+    private const int PasswordSaltSize = 16;
+    private const int PasswordHashSize = 32;
+    private const int PasswordHashIterations = 100_000;
+    private const string PasswordHashPrefix = "PBKDF2_SHA256";
 
     public AppService()
     {
@@ -53,7 +58,7 @@ public sealed class AppService : IAppService
             VALUES ($username, $password, 0, 0, 300);
             """;
         insertCommand.Parameters.AddWithValue("$username", username);
-        insertCommand.Parameters.AddWithValue("$password", password);
+        insertCommand.Parameters.AddWithValue("$password", HashPassword(password));
         insertCommand.ExecuteNonQuery();
 
         message = "Registration successful. You can now log in.";
@@ -110,7 +115,7 @@ public sealed class AppService : IAppService
             isLocked = false;
         }
 
-        if (!string.Equals(storedPassword, password, StringComparison.Ordinal))
+        if (!VerifyPassword(storedPassword, password))
         {
             failedAttempts++;
             var lockAccount = failedAttempts >= MaxFailedAttempts;
@@ -138,6 +143,19 @@ public sealed class AppService : IAppService
 
             message = $"Invalid username or password. Attempts left: {MaxFailedAttempts - failedAttempts}";
             return false;
+        }
+
+        if (!IsPasswordHashFormat(storedPassword))
+        {
+            using var migratePasswordCommand = connection.CreateCommand();
+            migratePasswordCommand.CommandText = """
+                UPDATE Users
+                SET Password = $passwordHash
+                WHERE Username = $username;
+                """;
+            migratePasswordCommand.Parameters.AddWithValue("$passwordHash", HashPassword(password));
+            migratePasswordCommand.Parameters.AddWithValue("$username", username);
+            migratePasswordCommand.ExecuteNonQuery();
         }
 
         using var resetCommand = connection.CreateCommand();
@@ -310,12 +328,6 @@ public sealed class AppService : IAppService
 
     private static bool TryValidatePassword(string password, out string message)
     {
-        if (password.Length != 12)
-        {
-            message = "Password must be exactly 12 characters.";
-            return false;
-        }
-
         if (!password.Any(char.IsUpper))
         {
             message = "Password must contain at least one uppercase letter.";
@@ -330,6 +342,59 @@ public sealed class AppService : IAppService
 
         message = string.Empty;
         return true;
+    }
+
+    private static string HashPassword(string password)
+    {
+        var salt = RandomNumberGenerator.GetBytes(PasswordSaltSize);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, PasswordHashIterations, HashAlgorithmName.SHA256, PasswordHashSize);
+        return $"{PasswordHashPrefix}${PasswordHashIterations}${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
+    }
+
+    private static bool VerifyPassword(string storedPassword, string password)
+    {
+        if (!TryParsePasswordHash(storedPassword, out var iterations, out var salt, out var expectedHash))
+        {
+            return string.Equals(storedPassword, password, StringComparison.Ordinal);
+        }
+
+        var actualHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expectedHash.Length);
+        return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
+    }
+
+    private static bool IsPasswordHashFormat(string storedPassword)
+    {
+        return TryParsePasswordHash(storedPassword, out _, out _, out _);
+    }
+
+    private static bool TryParsePasswordHash(string storedPassword, out int iterations, out byte[] salt, out byte[] hash)
+    {
+        iterations = 0;
+        salt = [];
+        hash = [];
+
+        var parts = storedPassword.Split('$');
+        if (parts.Length != 4 || !string.Equals(parts[0], PasswordHashPrefix, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out iterations) || iterations <= 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            salt = Convert.FromBase64String(parts[2]);
+            hash = Convert.FromBase64String(parts[3]);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        return salt.Length > 0 && hash.Length > 0;
     }
 
     private static double CalculateCalories(string activityName, double metric1, double metric2, double metric3)
