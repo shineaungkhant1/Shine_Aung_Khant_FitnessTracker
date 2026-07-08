@@ -132,6 +132,12 @@ public sealed class RegisterScreenForm : BaseForm
         UiStyles.StylePrimaryButton(registerButton);
         registerButton.Click += (_, _) =>
         {
+            if (!_appService.ValidatePassword(passwordBox.Text, out var passwordMessage))
+            {
+                MessageBox.Show(passwordMessage, "Register Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(passwordBox.Text, confirmBox.Text, StringComparison.Ordinal))
             {
                 MessageBox.Show("Passwords do not match.", "Register Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -168,7 +174,7 @@ public sealed class RegisterScreenForm : BaseForm
         form.Controls.Add(confirmBox);
         form.Controls.Add(new Label
         {
-            Text = "Password must include at least one uppercase and one lowercase letter.",
+            Text = "Password must be exactly 12 characters and include uppercase + lowercase letters.",
             ForeColor = AppTheme.MutedText,
             AutoSize = true,
             Margin = new Padding(0, 8, 0, 8)

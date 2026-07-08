@@ -73,12 +73,13 @@ public sealed class LoginScreenForm : BaseForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 10
+            RowCount = 11
         };
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
         form.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
@@ -144,6 +145,13 @@ public sealed class LoginScreenForm : BaseForm
         form.Controls.Add(usernameBox);
         form.Controls.Add(UiStyles.CreateCaption("Password"));
         form.Controls.Add(passwordBox);
+        form.Controls.Add(new Label
+        {
+            Text = "Password must be exactly 12 characters and include uppercase + lowercase letters.",
+            ForeColor = AppTheme.MutedText,
+            AutoSize = true,
+            Margin = new Padding(0, 8, 0, 8)
+        });
         form.Controls.Add(new Label
         {
             Text = "Account locks after 3 failed attempts.",

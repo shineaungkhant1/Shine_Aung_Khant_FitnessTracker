@@ -65,6 +65,11 @@ public sealed class AppService : IAppService
         return true;
     }
 
+    public bool ValidatePassword(string password, out string message)
+    {
+        return TryValidatePassword(password, out message);
+    }
+
     public bool Login(string username, string password, out string message)
     {
         username = username.Trim();
@@ -113,6 +118,12 @@ public sealed class AppService : IAppService
 
             failedAttempts = 0;
             isLocked = false;
+        }
+
+        if (!TryValidatePassword(password, out var passwordMessage))
+        {
+            message = passwordMessage;
+            return false;
         }
 
         if (!VerifyPassword(storedPassword, password))
@@ -328,6 +339,12 @@ public sealed class AppService : IAppService
 
     private static bool TryValidatePassword(string password, out string message)
     {
+        if (password.Length != 12)
+        {
+            message = "Password must be exactly 12 characters long.";
+            return false;
+        }
+
         if (!password.Any(char.IsUpper))
         {
             message = "Password must contain at least one uppercase letter.";

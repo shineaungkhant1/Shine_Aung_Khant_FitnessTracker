@@ -5,6 +5,7 @@ namespace FitnessTracker.Services;
 public interface IAppService
 {
     bool Register(string username, string password, out string message);
+    bool ValidatePassword(string password, out string message);
     bool Login(string username, string password, out string message);
     void Logout();
     string? CurrentUsername { get; }

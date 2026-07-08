@@ -698,7 +698,7 @@ public sealed class MainShellForm : BaseForm
             RowCount = 0
         };
         faqItems.Controls.Add(CreateHelpRow("How do I create an account?",
-            "Use Register with letters/numbers username and exactly 12-char password."));
+            "Use Register with letters/numbers username and exactly 12-character password."));
         faqItems.Controls.Add(CreateHelpRow("Why am I blocked from login?",
             "After 3 failed attempts, login is temporarily locked for security."));
         faqItems.Controls.Add(CreateHelpRow("How do I set my goal?",
